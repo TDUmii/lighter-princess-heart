@@ -52,7 +52,7 @@ export class VolumeRenderer {
     ]);
     this.pointU = uniforms(gl, this.points, [
       'uResolution', 'uCenter', 'uUnit', 'uZoom', 'uRatio',
-      'uTime', 'uPeriod', 'uBeat', 'uBurstTravel', 'uYaw', 'uPitch', 'uPass'
+      'uTime', 'uPeriod', 'uBeat', 'uBurstTravel', 'uReturnTravel', 'uReturnInset', 'uYaw', 'uPitch', 'uPass'
     ]);
 
     this.vao = gl.createVertexArray();
@@ -137,6 +137,8 @@ export class VolumeRenderer {
     gl.uniform1f(this.pointU.uPeriod,HEART.period);
     gl.uniform1f(this.pointU.uBeat,beat);
     gl.uniform1f(this.pointU.uBurstTravel,HEART.burstTravel);
+    gl.uniform1f(this.pointU.uReturnTravel,HEART.returnTravel);
+    gl.uniform1f(this.pointU.uReturnInset,HEART.returnInset);
     gl.uniform1f(this.pointU.uYaw,yaw);
     gl.uniform1f(this.pointU.uPitch,pitch);
 

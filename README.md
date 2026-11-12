@@ -111,3 +111,12 @@ Cảnh phim chỉ cung cấp ảnh/video tham khảo; đây không phải mã ng
 - Nút **⟲ Chính diện** nằm giữa phía dưới, đưa tim về góc nhìn trước; nút zoom ở phía dưới bên phải.
 - Chữ bí mật vẫn chỉ hiện khi phóng to sâu vào giữa tim.
 - [Báo cáo QA phiên bản 4.5](./V4_5_QA.md).
+
+## Phiên bản 4.6 — Trái tim nhỏ bay trở về khi co
+
+- Khắc phục lỗi trước đây: khi tim co, chỉ có toàn bộ khối hạt thu nhỏ còn những trái tim nhỏ ngoài viền thì biến mất.
+- Sau pha bung ra, các **trái tim mini bay ngược từ bên ngoài về tim** theo hướng pháp tuyến 3D của từng hạt, rồi tiến vào bên trong lớp vỏ.
+- Quỹ đạo trở về chuyển tiếp mượt qua ranh giới giữa hai nhịp, không nhảy vị trí khi đồng hồ nhịp quay về 0.
+- Các hạt quay về sáng và lớn hơn nhẹ để dễ phân biệt; chuyển động nén cả khối vẫn giữ nguyên.
+- Không tự xoay; nút **⟲ Chính diện** vẫn ở giữa. Chữ `love you` chỉ hiện khi zoom sâu.
+- [Báo cáo kiểm thử v4.6](./V4_6_QA.md).

@@ -31,9 +31,29 @@ export function heartbeat(seconds) {
 }
 
 export function burstStrength(phase, delay = 0) {
-  const p = (phase - .30 - delay) / .42;
+  const p = (phase - .30 - delay) / .355;
   if (p <= 0 || p >= 1) return 0;
   return Math.sin(Math.PI * p) ** 1.45;
+}
+
+// The expelled mini-hearts reappear outside the surface in the final part
+// of a beat, then fly back along their actual 3D normals as contraction starts.
+// Unwrap the cycle around phase zero so the homeward path never jumps.
+export function returnProgress(phase, delay = 0) {
+  const wrapped = phase > .65 ? phase - 1 : phase;
+  const shift = (delay - .075) * .36;
+  return (wrapped + .18 - shift) / .36;
+}
+
+export function returnStrength(phase, delay = 0) {
+  const progress = returnProgress(phase, delay);
+  if (progress <= 0 || progress >= 1) return 0;
+  return Math.sin(Math.PI * progress) ** .72;
+}
+
+export function returnDistance(phase, delay = 0) {
+  const t = ease(returnProgress(phase, delay));
+  return HEART.returnTravel * (1 - t) - HEART.returnInset * t;
 }
 
 export function deformScale(kind, radial, beat) {
