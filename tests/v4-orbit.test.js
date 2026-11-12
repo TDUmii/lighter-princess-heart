@@ -46,10 +46,12 @@ test('soft shell normal still points outward after shape correction', () => {
   assert.ok(valid>235);
 });
 
-test('billboard message always visible and not attached to rotating GPU points', () => {
+test('billboard message appears only after zooming deep into the center', () => {
   const scene=readFileSync(new URL('../src/v4/scene.js',import.meta.url),'utf8');
   const index=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-  assert.match(scene,/this\.secret\.style\.visibility='visible'/);
+  assert.match(scene,/HEART\.secretZoom/);
+  assert.match(scene,/visibility=reveal>0\.005\?'visible':'hidden'/);
+  assert.doesNotMatch(index,/class="orbit-hint"/);
   assert.match(scene,/yaw:this\.yaw,pitch:this\.pitch/);
   assert.match(index,/id="reset-view"/);
   assert.match(index,/id="orbit-toggle"/);

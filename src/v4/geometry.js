@@ -99,6 +99,37 @@ export function outlineSample(rand) {
 }
 
 export function volumeThickness(x, y) {
-  const radius = Math.hypot(x / 16.5, (y - 1.2) / 18);
-  return 7.1 * Math.sqrt(Math.max(.035, 1 - Math.min(1, radius) ** 2));
+  const row = Math.floor((y - Y_MIN) / (Y_MAX - Y_MIN) * SCANLINES);
+  if (row < 0 || row >= SCANLINES) return .35;
+  const bounds = scanlines[row];
+  let cross = 0;
+  for (let i = 0; i + 1 < bounds.length; i += 2) {
+    const left = bounds[i], right = bounds[i + 1];
+    if (x < left || x > right) continue;
+    const half = Math.max(.01, (right - left) * .5);
+    const u = (x - (left + right) * .5) / half;
+    cross = Math.sqrt(Math.max(0, 1 - u * u));
+    break;
+  }
+  // A rounded front/back skin instead of a flat extruded heart silhouette.
+  const height = Math.max(0, Math.min(1, (y - Y_MIN) / (Y_MAX - Y_MIN)));
+  const vertical = .46 + .54 * Math.sin(Math.PI * height) ** .55;
+  return .35 + 12.7 * cross * vertical;
+}
+
+export function surfacePoint(rand) {
+  const {x, y} = insidePoint(rand);
+  const sign = rand() < .5 ? -1 : 1;
+  const h = volumeThickness(x, y);
+  const z = sign * h * (.93 + rand() * .065);
+  const step = .055;
+  const dx = (volumeThickness(x + step, y) - volumeThickness(x - step, y)) / (step * 2);
+  const dy = (volumeThickness(x, y + step) - volumeThickness(x, y - step)) / (step * 2);
+  const length = Math.hypot(dx, dy, 1) || 1;
+  return {
+    x, y, z,
+    nx: -sign * dx / length,
+    ny: -sign * dy / length,
+    nz: sign / length
+  };
 }

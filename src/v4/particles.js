@@ -4,7 +4,7 @@ import { createCoreParticle } from './layers/core.js';
 import { createShellParticle } from './layers/shell.js';
 import { createBurstParticle } from './layers/burst.js';
 
-export const STRIDE = 12;
+export const STRIDE = 13;
 export const CORE = 0;
 export const SHELL = 1;
 export const BURST = 2;
@@ -24,6 +24,7 @@ function write(data, index, particle, rand) {
   data[o + 9] = particle.ny;
   data[o + 10] = rand() * .15;
   data[o + 11] = .55 + rand() * 1.15;
+  data[o + 12] = particle.nz || 0;
 }
 
 export function createParticleSystems(quality, seed = HEART.seed) {

@@ -79,7 +79,7 @@ export class CanvasRenderer {
       let x=a[j],y=a[j+1],z=a[j+2];
       const kind=a[j+3];
       const seed=a[j+4], size=a[j+5], alpha=a[j+6];
-      const tone=a[j+7], nx=a[j+8], ny=a[j+9];
+      const tone=a[j+7], nx=a[j+8], ny=a[j+9], nz=a[j+12];
       const delay=a[j+10],speed=a[j+11];
       const radius=Math.min(1,Math.hypot(x/16,(y-1)/17));
       const scale=deformScale(kind,radius,beat);
@@ -91,6 +91,7 @@ export class CanvasRenderer {
       } else {
         x+=nx*.10*Math.sin(time*speed+seed);
         y+=ny*.10*Math.sin(time*speed+seed);
+        z+=nz*.10*Math.sin(time*speed+seed);
       }
 
       let opacity=1;
@@ -101,8 +102,11 @@ export class CanvasRenderer {
         const flight=Math.pow(Math.max(0,Math.min(1,age)),.72);
         x+=nx*HEART.burstTravel*flight;
         y+=ny*HEART.burstTravel*flight;
+        z+=nz*HEART.burstTravel*flight;
       }
 
+      const depthBulge=Math.min(1,Math.abs(z)/13.5);
+      y=1+(y-1)*(1-.22*depthBulge*depthBulge);
       const rotated=rotatePoint(x,y,z,yaw,pitch);
       const depthScale=perspectiveScale(rotated.z);
       const px=rotated.x*unit*.87*depthScale;

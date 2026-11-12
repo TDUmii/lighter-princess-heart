@@ -9,7 +9,6 @@ export class HeartScene {
     this.canvas = canvas;
     this.label = zoomLabel;
     this.secret = document.querySelector('#secret-message');
-    if (this.secret) this.secret.setAttribute('aria-hidden', 'false');
     this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     this.width = 1;
     this.height = 1;
@@ -239,11 +238,13 @@ export class HeartScene {
       yaw:this.yaw,pitch:this.pitch
     });
     if(!this.secret)return;
-    this.secret.style.visibility='visible';
-    this.secret.style.opacity='.96';
+    const reveal=clamp((this.zoom-HEART.secretZoom)/.68,0,1);
+    this.secret.style.visibility=reveal>0.005?'visible':'hidden';
+    this.secret.setAttribute('aria-hidden',reveal>0.005?'false':'true');
+    this.secret.style.opacity=(reveal*.93).toFixed(3);
     this.secret.style.left=(this.width*.5+this.panX)+'px';
     this.secret.style.top=(this.height*.5-this.unit*1.7+this.panY)+'px';
-    this.secret.style.transform='translate(-50%, -50%) scale('+clamp(this.zoom*.86,1,2.25).toFixed(3)+')';
+    this.secret.style.transform='translate(-50%, -50%) scale('+clamp(this.zoom*.74,.8,2.25).toFixed(3)+')';
   }
 }
 

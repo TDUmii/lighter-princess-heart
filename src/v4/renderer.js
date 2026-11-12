@@ -60,7 +60,7 @@ export class VolumeRenderer {
     gl.bindVertexArray(this.vao);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
     const stride = STRIDE * Float32Array.BYTES_PER_ELEMENT;
-    const layout = [[0,3,0],[1,4,3],[2,4,7],[3,1,11]];
+    const layout = [[0,3,0],[1,4,3],[2,4,7],[3,2,11]];
     for (const [location, size, offset] of layout) {
       gl.enableVertexAttribArray(location);
       gl.vertexAttribPointer(location,size,gl.FLOAT,false,stride,offset*4);

@@ -12,7 +12,7 @@ export function createCoreParticle(rand) {
   const nearRim = Math.min(1, Math.max(0, (radius - .40) / .57));
   return {
     x: p.x, y: p.y, z,
-    kind: 0, nx: 0, ny: 0,
+    kind: 0, nx: 0, ny: 0, nz: 0,
     alpha: (.37 + rand() * .34) * (.81 + .29 * nearRim)
   };
 }

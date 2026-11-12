@@ -10,7 +10,7 @@ export const HEART = Object.freeze({
   backgroundGlow: 0.26,
   shellMovement: 0.46,
   burstTravel: 3.05,
-  secretZoom: 2.65
+  secretZoom: 2.40
 });
 
 export function qualityFor(width, height, pixelRatio = 1) {

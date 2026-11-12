@@ -69,7 +69,13 @@ MIT.
 
 - Kéo chuột hoặc vuốt một ngón để xoay khối tim quanh 360° theo chiều ngang, nghiêng lên/xuống.
 - Có chế độ xoay tự động nhẹ, nút tạm dừng/tiếp tục và nút trả về mặt trước.
-- Chữ **love you** luôn nhìn thấy khi xoay, không cần zoom sâu.
+- Chữ **love you** chỉ hiện khi zoom sâu vào trung tâm, và vẫn hướng người xem ở mọi góc.
 - Đáy tim được bo và rút ngắn; giữ lõi 3D, vỏ hạt mềm và hạt bắn ra ở đỉnh nhịp.
 - Chế độ Canvas2D dự phòng cũng hỗ trợ quay góc nhìn.
 - [Báo cáo kiểm thử 4.1](./V4_1_QA.md).
+## Phiên bản 4.2 - Khối tim 3D tròn đầy
+- Lõi có độ dày 3D theo đường bao thực tế, vỏ bám mặt cong trước/sau thay vì tập trung trên một đường dọc phẳng.
+- Hạt bung ra theo pháp tuyến 3D (cả trục Z), hình nhìn từ cạnh tròn và ít vạch viền cứng hơn.
+- Chữ `love you` ẩn ở 100% và chỉ hiển thị khi zoom sâu vào tâm, dù đang xoay ở góc nào.
+- Đã loại dòng hướng dẫn ở góc màn hình, giữ các nút xoay và zoom.
+- [Báo cáo kiểm thử 4.2](./V4_2_QA.md).
