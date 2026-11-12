@@ -29,8 +29,8 @@ test('heart tip is rounded and shortened without breaking symmetry', () => {
   const middle=heartPoint(Math.PI);
   const left=heartPoint(Math.PI-.18);
   const right=heartPoint(Math.PI+.18);
-  assert.ok(middle.y<16);
-  assert.ok(middle.y>14);
+  assert.ok(middle.y<17.1);
+  assert.ok(middle.y>16.2);
   assert.ok(Math.abs(left.x+right.x)<1e-5);
   assert.ok(Math.abs(left.y-right.y)<1e-5);
   assert.ok(Math.abs(left.x)>.45);

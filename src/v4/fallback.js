@@ -115,7 +115,11 @@ export class CanvasRenderer {
       const red=Math.round(226+29*tone);
       const green=Math.round(35+102*(.42*tone+.58*light));
       const blue=Math.round(74+95*(.42*tone+.58*light));
-      ctx.globalAlpha=alpha*(.75+.30*light)*opacity;
+      const surfaceNormal=kind===1?rotatePoint(nx,ny,nz,yaw,pitch):null;
+      const rimGlow=surfaceNormal
+        ? .60+.98*Math.pow(Math.max(0,1-Math.abs(surfaceNormal.z)),1.55)
+        : 1;
+      ctx.globalAlpha=Math.min(1,alpha*(.75+.30*light)*opacity*rimGlow);
       ctx.fillStyle='rgb('+red+','+green+','+blue+')';
       const d=Math.max(.8,size*(kind===2?1.45:1.78)*Math.pow(zoom,.15));
       if(zoom>2.25&&kind!==2){

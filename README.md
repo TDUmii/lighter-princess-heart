@@ -79,3 +79,14 @@ MIT.
 - Chữ `love you` ẩn ở 100% và chỉ hiển thị khi zoom sâu vào tâm, dù đang xoay ở góc nào.
 - Đã loại dòng hướng dẫn ở góc màn hình, giữ các nút xoay và zoom.
 - [Báo cáo kiểm thử 4.2](./V4_2_QA.md).
+
+## Phiên bản 4.3 - Dựng lại khối tim 3D thật
+
+- Thay hình học 2D kéo dày bằng **trường hình khối 3D liên tục**, gồm hai múi cầu trên kết hợp mềm với phần thân bo cong và thu dần về đáy.
+- Toàn bộ hạt lõi được lấy mẫu trong **thể tích 3D**. Các hạt vỏ và hạt bung được lấy mẫu trên **bề mặt khối 3D** cùng pháp tuyến 3 trục.
+- Xoay ngang không còn đỉnh bị cắt phẳng hoặc dải sáng ghép giữa hai mặt; rìa hồng sáng rõ hơn còn phần tâm dịu hơn.
+- Giữ nhịp 0,9 giây, góc quay 360°, phóng to, chữ `love you` chỉ xuất hiện khi zoom sâu, và không có dòng hướng dẫn ở góc.
+- Bản 4.2 cũ được giữ trong lịch sử Git để có thể hoàn nguyên.
+- [Báo cáo kiểm thử hình học và đối chiếu ảnh phim 4.3](./V4_3_QA.md).
+
+Cảnh phim chỉ cung cấp ảnh/video tham khảo; đây không phải mã nguồn, rig hoặc dữ liệu hoạt hình chính thức của đoàn phim.

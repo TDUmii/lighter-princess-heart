@@ -1,18 +1,13 @@
-import { insidePoint, volumeThickness } from '../geometry.js';
+import { insideVolumePoint } from '../geometry.js';
 
 export function createCoreParticle(rand) {
-  let p = insidePoint(rand);
-  for (let attempt = 0; attempt < 14; attempt++) {
-    const radius = Math.hypot(p.x / 16, (p.y - 1) / 17);
-    if (rand() < .23 + .77 * Math.min(1, radius)) break;
-    p = insidePoint(rand);
-  }
-  const z = (rand() * 2 - 1) * volumeThickness(p.x, p.y);
-  const radius = Math.min(1, Math.hypot(p.x / 16, (p.y - 1) / 17));
-  const nearRim = Math.min(1, Math.max(0, (radius - .40) / .57));
+  const p = insideVolumePoint(rand);
+  const radial = Math.min(1, Math.hypot(
+    p.x / 17.0, (p.y - 1.2) / 17.1, p.z / 14.0
+  ));
   return {
-    x: p.x, y: p.y, z,
+    x: p.x, y: p.y, z: p.z,
     kind: 0, nx: 0, ny: 0, nz: 0,
-    alpha: (.37 + rand() * .34) * (.81 + .29 * nearRim)
+    alpha: (.24 + rand() * .30) * (.78 + .25 * radial)
   };
 }

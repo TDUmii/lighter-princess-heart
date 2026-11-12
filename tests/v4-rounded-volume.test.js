@@ -6,7 +6,7 @@ import {HEART} from '../src/v4/config.js';
 import {pointVertex} from '../src/v4/shaders.js';
 
 test('heart has a rounded 3D body, not a thin planar extrusion',()=>{
-  assert.ok(volumeThickness(0,1)>12);
+  assert.ok(volumeThickness(0,1)>10.5);
   assert.ok(volumeThickness(12,1)>5);
   assert.ok(volumeThickness(16,1)<2);
   assert.ok(volumeThickness(0,1)>volumeThickness(12,1));
