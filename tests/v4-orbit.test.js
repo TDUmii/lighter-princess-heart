@@ -54,7 +54,8 @@ test('billboard message appears only after zooming deep into the center', () => 
   assert.doesNotMatch(index,/class="orbit-hint"/);
   assert.match(scene,/yaw:this\.yaw,pitch:this\.pitch/);
   assert.match(index,/id="reset-view"/);
-  assert.match(index,/id="orbit-toggle"/);
+  assert.doesNotMatch(index,/id="orbit-toggle"/);
+  assert.match(index,/class="front-view-button"/);
   assert.match(index,/love you/);
   assert.match(pointVertex,/uniform float uYaw/);
   assert.match(pointVertex,/uniform float uPitch/);

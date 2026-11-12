@@ -184,3 +184,40 @@ body {
     font-size: 29px;
   }
 }
+
+/* Manual orbit only: a centered shortcut restores the frontal view. */
+.front-view-button {
+  position: fixed;
+  z-index: 3;
+  left: 50%;
+  bottom: max(18px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  min-height: 42px;
+  padding: 9px 17px;
+  border: 1px solid rgba(255, 180, 215, .34);
+  border-radius: 999px;
+  background: rgba(23, 9, 20, .76);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  color: #ffe0ec;
+  font: 500 13px/1.1 system-ui, sans-serif;
+  letter-spacing: .01em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .15s ease, border-color .15s ease;
+}
+.front-view-button:hover {
+  background: rgba(76, 25, 56, .84);
+  border-color: rgba(255, 180, 215, .65);
+}
+.front-view-button:focus-visible {
+  outline: 2px solid #ffa0cc;
+  outline-offset: 3px;
+}
+@media (max-width: 640px) {
+  .front-view-button {
+    bottom: max(68px, calc(env(safe-area-inset-bottom) + 56px));
+    min-height: 38px;
+    padding: 8px 16px;
+  }
+}

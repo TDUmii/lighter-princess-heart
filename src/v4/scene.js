@@ -21,7 +21,6 @@ export class HeartScene {
     this.pitch = ORBIT.initialPitch;
     this.yawVelocity = 0;
     this.pitchVelocity = 0;
-    this.autoRotate = true;
     this.lastInteraction = performance.now();
     this.quality = null;
     this.startedAt = performance.now();
@@ -91,9 +90,8 @@ export class HeartScene {
         }else{
           this.yaw += dx*ORBIT.dragSensitivity;
           this.pitch=clamp(this.pitch+dy*ORBIT.dragSensitivity*.82,ORBIT.minPitch,ORBIT.maxPitch);
-          const elapsed=Math.max(.008,(now-prev.time)/1000);
-          this.yawVelocity=clamp(dx*ORBIT.dragSensitivity/elapsed,-3,3);
-          this.pitchVelocity=clamp(dy*ORBIT.dragSensitivity*.82/elapsed,-2,2);
+          this.yawVelocity=0;
+          this.pitchVelocity=0;
         }
         if(this.reducedMotion.matches)this.draw(now);
       }
@@ -164,14 +162,12 @@ export class HeartScene {
   resetView(){
     this.yaw=0;
     this.pitch=0;
+    this.panX=0;
+    this.panY=0;
     this.yawVelocity=0;
     this.pitchVelocity=0;
     this.lastInteraction=performance.now();
     if(this.reducedMotion.matches)this.draw(performance.now());
-  }
-  setAutoRotate(enabled){
-    this.autoRotate=Boolean(enabled);
-    this.lastInteraction=performance.now();
   }
 
   zoomIn(){this.setZoom(this.targetZoom*1.24);}
@@ -200,14 +196,7 @@ export class HeartScene {
     if(Math.abs(this.zoom-this.targetZoom)<.001)this.zoom=this.targetZoom;
 
     if(!this.pointers.size){
-      const dt=delta/1000;
-      this.yaw+=this.yawVelocity*dt;
-      this.pitch=clamp(this.pitch+this.pitchVelocity*dt,ORBIT.minPitch,ORBIT.maxPitch);
-      this.yawVelocity*=Math.exp(-4.1*dt);
-      this.pitchVelocity*=Math.exp(-4.1*dt);
-      if(this.autoRotate && now-this.lastInteraction>1800){
-        this.yaw+=ORBIT.autoSpeed*dt;
-      }
+      // Preserve the exact camera angle after a drag: no automatic spin or inertia.
       if(Math.abs(this.yaw)>100)this.yaw%=Math.PI*2;
     }
 

@@ -67,10 +67,10 @@ test('surface particles stay on the same smooth closed 3D field',()=>{
 
 test('reference lighting uses rim emphasis and some miniature heart glyphs at normal zoom',()=>{
   assert.match(pointVertex,/vRim = silhouette/);
-  assert.match(pointVertex,/vIsHeart=isSymbol/);
+  assert.match(pointVertex,/vIsHeart=kind>1\.5\?1\.0:isSymbol/);
   assert.match(pointFragment,/vIsHeart/);
   assert.match(pointFragment,/rimLight/);
-  assert.match(pointVertex,/p\.z \*= \(1\. \+ uBeat\*\.46\)/);
+  assert.match(pointVertex,/p\.z \*= pulseScale/);
   assert.ok(heartUnit(1200,637)>14);
   assert.ok(heartUnit(390,844)>8);
 });

@@ -68,7 +68,7 @@ MIT.
 ## Phiên bản 4.1: góc nhìn 3D
 
 - Kéo chuột hoặc vuốt một ngón để xoay khối tim quanh 360° theo chiều ngang, nghiêng lên/xuống.
-- Có chế độ xoay tự động nhẹ, nút tạm dừng/tiếp tục và nút trả về mặt trước.
+- Bản 4.1 từng có xoay tự động; từ phiên bản 4.5 đã bỏ tự xoay hoàn toàn.
 - Chữ **love you** chỉ hiện khi zoom sâu vào trung tâm, và vẫn hướng người xem ở mọi góc.
 - Đáy tim được bo và rút ngắn; giữ lõi 3D, vỏ hạt mềm và hạt bắn ra ở đỉnh nhịp.
 - Chế độ Canvas2D dự phòng cũng hỗ trợ quay góc nhìn.
@@ -101,3 +101,13 @@ Cảnh phim chỉ cung cấp ảnh/video tham khảo; đây không phải mã ng
 - [Báo cáo kiểm thử 4.4](./V4_4_QA.md).
 
 Ảnh mẫu là hình nghệ thuật tĩnh được dùng làm định hướng phong cách; bản web là hiệu ứng 3D lập trình độc lập chứ không chèn ảnh vào nền.
+
+## Phiên bản 4.5 — Nhịp co rõ, nhiều trái tim nhỏ và camera đứng yên
+
+- Pha **nén vào tâm** tăng mạnh, đồng bộ cả chiều sâu 3D; sau đó tim bật nở rồi hồi nhẹ theo chu kỳ 0,90 giây.
+- Các hạt hình trái tim nhỏ xuất hiện nhiều hơn ở bên trong; hạt bay khỏi mặt ngoài cũng là trái tim mini thay vì chỉ là chấm sáng.
+- Số hạt bung tăng lên 2.000 (desktop) và 850 (mobile), đi xa hơn một chút nhưng vẫn tắt nhanh theo nhịp.
+- **Tắt hoàn toàn tự xoay**, kể cả quán tính sau khi kéo. Vẫn kéo bằng chuột/vuốt để xoay thủ công.
+- Nút **⟲ Chính diện** nằm giữa phía dưới, đưa tim về góc nhìn trước; nút zoom ở phía dưới bên phải.
+- Chữ bí mật vẫn chỉ hiện khi phóng to sâu vào giữa tim.
+- [Báo cáo QA phiên bản 4.5](./V4_5_QA.md).

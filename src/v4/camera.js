@@ -4,7 +4,6 @@ export const ORBIT = Object.freeze({
   minPitch: -1.12,
   maxPitch: 1.12,
   perspectiveDistance: 72,
-  autoSpeed: 0.095,
   dragSensitivity: 0.0075
 });
 

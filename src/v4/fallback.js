@@ -86,10 +86,8 @@ export class CanvasRenderer {
       x*=scale;
       y=1+(y-1)*scale;
 
-      if (kind===0) {
-        z*=1+beat*(1.13-.35*radius);
-      } else {
-        z*=1+beat*.46;
+      z*=scale;
+      if (kind!==0) {
         x+=nx*.10*Math.sin(time*speed+seed);
         y+=ny*.10*Math.sin(time*speed+seed);
         z+=nz*.10*Math.sin(time*speed+seed);
@@ -97,7 +95,7 @@ export class CanvasRenderer {
 
       let opacity=1;
       if (kind===2) {
-        const age=(phase-.30-delay)/.38;
+        const age=(phase-.30-delay)/.42;
         opacity=burstStrength(phase,delay);
         if(opacity<=0)continue;
         const flight=Math.pow(Math.max(0,Math.min(1,age)),.72);
@@ -121,8 +119,9 @@ export class CanvasRenderer {
       ctx.globalAlpha=Math.min(1,alpha*(.75+.30*light)*opacity*rimGlow);
       ctx.fillStyle='rgb('+red+','+green+','+blue+')';
       const d=Math.max(.8,size*(kind===2?1.45:1.78)*Math.pow(zoom,.15));
-      if(zoom>2.25&&kind!==2){
-        const heartSize=Math.max(1.6,d*2);
+      const isLittleHeart=kind===2 || (((Math.sin(seed*93.271)*43758.5453)%1+1)%1 > .946);
+      if((zoom>2.25&&kind!==2)||isLittleHeart){
+        const heartSize=Math.max(1.6,d*(kind===2?2.1:2.25));
         ctx.drawImage(this.sprite,px-heartSize/2,py-heartSize/2,heartSize,heartSize);
       } else {
         ctx.beginPath();
