@@ -55,3 +55,11 @@ Không chép khung hình phim, âm thanh hay mã nguồn của bên thứ ba và
 - Dùng công thức ẩn hình trái tim trong fragment shader để vẽ từng tim nhỏ, không thay bằng chấm tròn.
 - Chuyển màu đỏ hồng sáng và tăng hào quang/tia sáng phía sau, không tăng sáng hạt đơn lẻ quá mạnh.
 - Chữ love you phong cách thư pháp, ẩn mặc định, xuất hiện từ zoom khoảng 245%, rõ ở 330% trở lên.
+
+## Phiên bản 3 - Đo so với ảnh chụp gốc
+- Nguồn: https://www.beauty321.com/post/51841 , ảnh tại il.beauty321.com/gallery/articleIMG/month_2211/photo-6374bd9cac549.jpg.
+- Tại 1200x637: ảnh phim bbox sáng x=412..824, y=127..527 (34,4% x 63,0%); bản 2.2 quá lớn 71,0% x 88,7%; bản thử v3C 34,4% x 63,4%.
+- Bản gốc tỉ lệ điểm hồng đỏ nổi bật 8,1%, bản 2.2 11,9%, bản 3 thử 4,1%. Chủ động giữ v3 thoáng và dịu hơn theo ý người dùng.
+- Phát sáng từ nền xanh đen rất tối, không tạo ray dài; rim có độ sáng cao hơn interior nhưng không đập thành hai lớp.
+- Tim bé chuẩn phương hướng (nhọn xuống), chỉ nhận ra khi zoom sâu; lời nhắn ẩn ở 100% và xuất hiện tại 450%.
+- Antigravity 1.5.1 đã được thử headless read-only, chưa có báo cáo vì lần đầu từ chối read_file và lần hai timeout. Settings quyền được khôi phục.

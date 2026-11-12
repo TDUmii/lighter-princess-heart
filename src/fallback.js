@@ -47,7 +47,7 @@ export class CanvasFallback {
     const width = this.width;
     const height = this.height;
     const centerX = width * .5 + panX;
-    const centerY = height * .5 - unit * 1.8 + panY;
+    const centerY = height * .5 - unit * 2.0 + panY;
 
     ctx.setTransform(this.ratio, 0, 0, this.ratio, 0, 0);
     ctx.globalAlpha = 1;
@@ -110,8 +110,8 @@ export class CanvasFallback {
       const blue = Math.round(14 + 34 * tone);
       ctx.globalAlpha = alpha * flicker;
       ctx.fillStyle = 'rgb(' + red + ',' + green + ',' + blue + ')';
-      const px = x * unit;
-      const py = y * unit;
+      const px = x * unit * .80;
+      const py = y * unit * .88;
       if (points[i + 2] < 1.5) {
         const heartSize = Math.max(1.6, size * 2.75);
         ctx.drawImage(this.sprite, px - heartSize / 2, py - heartSize / 2, heartSize, heartSize);

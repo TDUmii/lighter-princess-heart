@@ -24,14 +24,14 @@ test('ruby-red palette and rear halo are configured', () => {
   assert.ok(ART.baseColor[0] > ART.baseColor[1] * 5);
   assert.ok(ART.baseColor[0] > ART.baseColor[2] * 4);
   assert.ok(ART.pulseStrength < .05);
-  assert.ok(ART.rays > .5 && ART.rays < 1);
-  assert.match(skyFragment, /float aura = max\(upper, lower\)/);
+  assert.ok(ART.rays > 0 && ART.rays < .4);
+  assert.match(skyFragment, /float aura = max\(lobes, point\)/);
 });
 
 test('GPU renders miniature heart shapes instead of circular inner dots', async () => {
   const { particleFragment, particleVertex } = await import('../src/gpu/shaders.js');
-  assert.match(particleFragment, /float tinyHeart\(vec2 uv\)/);
-  assert.match(particleFragment, /float heart = tinyHeart\(gl_PointCoord\)/);
-  assert.match(particleFragment, /vLayer > 1\.5 \? roundSpark : heart/);
+  assert.match(particleFragment, /float miniHeart\(vec2 uv\)/);
+  assert.match(particleFragment, /float heartShape = miniHeart\(gl_PointCoord\)/);
+  assert.match(particleFragment, /vLayer > 1\.5 \? ambientSpark : heartShape/);
   assert.match(particleVertex, /vLayer = layer/);
 });

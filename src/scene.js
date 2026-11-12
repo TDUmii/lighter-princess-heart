@@ -249,7 +249,7 @@ export class HeartScene {
         this.secret.style.visibility = 'visible';
         this.secret.style.opacity = (amount * .9).toFixed(3);
         this.secret.style.left = (this.width * .5 + this.panX) + 'px';
-        this.secret.style.top = (this.height * .5 - this.unit * 1.8 + this.panY) + 'px';
+        this.secret.style.top = (this.height * .5 - this.unit * 2.0 + this.panY) + 'px';
         this.secret.style.transform = 'translate(-50%, -50%) scale(' + (this.zoom * .68).toFixed(3) + ')';
       }
     }

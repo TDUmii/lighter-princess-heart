@@ -35,3 +35,9 @@ Chỉ đánh dấu hoàn tất khi GitHub Pages báo build thành công, trang v
 - Chữ love you ẩn ở zoom 100-236%, xuất hiện từ khoảng 245% và rõ khi zoom trên 330%, đồng bộ pan/zoom.
 - Kiểm thử giả lập điện thoại 390x844: WebGL2 không lỗi; zoom 100, 124, 154, 191, 236, 293, 364, 450% đúng trạng thái; 12/12 unit tests.
 - 60 FPS được đo trên môi trường trình duyệt thử nghiệm, chưa đại diện cho điện thoại thực.
+
+## Phiên bản 3 - QA có ảnh đối chiếu
+- Desktop screenshot 1200x637 đo bright mask (R>95, R>1.36 G, R>1.02 B, R>max(G,B)+13): phim 34,4% x 63,0%, bản thử 34,4% x 63,4%.
+- Đã kiểm thử trên viewport 390x844: WebGL2=true, glError=0, zoom 450% cho love you xuất hiện, console 0 errors.
+- QA_TEMP chỉ lưu ảnh kiểm thử local, không đẩy ảnh chụp phim vào GitHub.
+- CLI Antigravity thử trong chế độ kiểm tra độc lập nhưng bị read_file permission/timeout, chưa tạo được báo cáo. Đã hoàn nguyên settings.

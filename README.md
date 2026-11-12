@@ -1,12 +1,12 @@
 # Trái tim
 
-Một trái tim **đỏ ruby** kết từ hàng nghìn hạt chuyển động nhẹ trên nền trời đêm, lấy cảm hứng từ cảnh lập trình trong phim *Chiếc Bật Lửa và Váy Công Chúa*.
+Một trái tim **hồng đỏ dịu** kết từ những trái tim nhỏ chuyển động nhẹ trên nền trời đêm, lấy cảm hứng từ cảnh lập trình trong phim *Chiếc Bật Lửa và Váy Công Chúa*.
 
 **Website công khai:** https://tdumii.github.io/lighter-princess-heart/
 
 ## Thiết kế
 
-- Hạt đỏ nhỏ, phân bố tự nhiên; đường viền không được vẽ thành một dải hạt đặc.
+- Trái tim nhỏ, mịn, mật độ dồn nhẹ gần rìa, tâm tối và thoáng; không vẽ thành một dải viền đặc.
 - Mỗi hạt trôi và nhấp nháy riêng, giữ tổng thể trái tim ổn định.
 - Nhịp tim rất nhẹ như hơi thở. Mọi hạt dùng cùng một trường biến dạng liên tục giảm dần ra phía ngoài, **không có ranh giới giữa lõi và vỏ khi đập**.
 - Quầng sáng đỏ hồng rõ hơn và chùm tia mềm được vẽ **phía sau toàn bộ khối trái tim**, không phụ thuộc vào các hạt phát sáng đơn lẻ.
@@ -50,3 +50,10 @@ Có thêm [kế hoạch tái dựng](./REBUILD_PLAN.md) và [ghi chú QA](./QA_N
 ## Giấy phép
 
 MIT. Đây là hiệu ứng được lập trình mới, không sử dụng mã nguồn, video hay âm thanh trích xuất từ phim.
+
+## Phiên bản 3: đối chiếu cảnh phim
+- Ảnh đối chiếu trực tiếp: https://www.beauty321.com/post/51841 (ảnh chụp cảnh trái tim lập trình tập 5).
+- Tỷ lệ vùng trái tim nổi bật ở khung 1200x637: phim 34,4% ngang / 63,0% cao; bản dựng 34,4% ngang / 63,4% cao.
+- 14.000 hạt trên desktop, 4.200 hạt trên thiết bị di động; các tim nhỏ chỉ rõ hình khi phóng to.
+- Giảm ánh sáng quầng, bỏ các tia laser dài và để trung tâm tim thoáng.
+- Giữ chức năng zoom 450%, kéo để xem, cùng lời nhắn love you ẩn khi chưa phóng to.

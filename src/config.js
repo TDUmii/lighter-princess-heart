@@ -2,15 +2,15 @@ export const ART = Object.freeze({
   title: 'Trái tim',
   mobileBreakpoint: 640,
   pulsePeriod: 1.72,
-  pulseStrength: 0.034,
-  touchPulse: 0.026,
+  pulseStrength: 0.025,
+  touchPulse: 0.021,
   zoomMin: 0.65,
   zoomMax: 4.5,
-  desktopParticles: 26000,
-  mobileParticles: 11000,
-  baseColor: [0.95, 0.10, 0.14],
-  glows: 0.35,
-  rays: 0.76
+  desktopParticles: 14000,
+  mobileParticles: 4200,
+  baseColor: [0.98, 0.13, 0.21],
+  glows: 0.22,
+  rays: 0.19
 });
 
 export function qualityFor(width, height, deviceRatio = 1) {
@@ -20,10 +20,13 @@ export function qualityFor(width, height, deviceRatio = 1) {
     mobile,
     count: mobile ? ART.mobileParticles : ART.desktopParticles,
     pixelRatio: ratio,
-    fieldOfView: mobile ? 35 : 39
+    fieldOfView: mobile ? 36 : 45
   };
 }
 
 export function heartUnit(width, height) {
-  return Math.min(width / 39.5, height / 36, 27);
+  const mobile = Math.min(width, height) < ART.mobileBreakpoint;
+  return mobile
+    ? Math.min(width / 43.5, height / 44, 21)
+    : Math.min(width / 51, height / 49, 21);
 }

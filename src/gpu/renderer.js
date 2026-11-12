@@ -121,7 +121,7 @@ export class ParticleRenderer {
     const resX = this.canvas.width;
     const resY = this.canvas.height;
     const centerX = (this.width * .5 + panX) * ratio;
-    const centerY = (this.height * .5 + unit * 1.8 - panY) * ratio;
+    const centerY = (this.height * .5 + unit * 2.0 - panY) * ratio;
 
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.disable(gl.BLEND);

@@ -4,3 +4,4 @@ coverage/
 *.log
 *qa.png
 .DS_Store
+QA_TEMP/
