@@ -1,0 +1,6 @@
+.playwright-cli/
+node_modules/
+coverage/
+*.log
+*qa.png
+.DS_Store

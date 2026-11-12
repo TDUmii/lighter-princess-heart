@@ -1,10 +1,10 @@
-﻿{
+{
   "name": "trai-tim",
   "private": true,
-  "version": "1.1.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "check": "node --check src/main.js && node --check src/scene.js && node --check src/gpu/renderer.js && node --check src/gpu/shaders.js"
   }
 }
-

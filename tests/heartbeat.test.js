@@ -1,26 +1,31 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { HEART } from '../src/config.js';
-import { heartbeat, coreScale, easeOutCubic } from '../src/heartbeat.js';
+import { ART } from '../src/config.js';
+import { gaussian, doubleBeat, pulseScale } from '../src/art/heartbeat.js';
 
-test('heartbeat produces two distinct pulses in each cycle', () => {
-  const beat1 = heartbeat(HEART.beatInterval * 0.12);
-  const beat2 = heartbeat(HEART.beatInterval * 0.31);
-  const rest = heartbeat(HEART.beatInterval * 0.7);
-  assert.ok(beat1 > beat2);
-  assert.ok(beat2 > rest);
-  assert.ok(rest < 0.03);
+test('two separate heartbeat peaks occur every cycle', () => {
+  const first = doubleBeat(ART.pulsePeriod * .12);
+  const second = doubleBeat(ART.pulsePeriod * .315);
+  const rest = doubleBeat(ART.pulsePeriod * .7);
+  assert.ok(first > second);
+  assert.ok(second > rest);
+  assert.ok(rest < .05);
 });
 
-test('outer shell can remain static while the core changes', () => {
-  const rest = coreScale(HEART.beatInterval * 0.7, -1, false);
-  const beat = coreScale(HEART.beatInterval * 0.12, -1, false);
-  assert.ok(beat > rest);
-  assert.equal(coreScale(0.2, 0.1, true), 1);
+test('heartbeat is periodic and remains bounded', () => {
+  for (let index = 0; index < 200; index++) {
+    const time = index * .031;
+    assert.ok(Math.abs(doubleBeat(time) -
+      doubleBeat(time + ART.pulsePeriod)) < 1e-8);
+    assert.ok(doubleBeat(time) <= 1.65);
+  }
 });
 
-test('fade in easing respects its range', () => {
-  assert.equal(easeOutCubic(0), 0);
-  assert.equal(easeOutCubic(1), 1);
-  assert.equal(easeOutCubic(2), 1);
+test('heart core changes scale without requiring shell changes', () => {
+  const beatScale = pulseScale(ART.pulsePeriod * .12);
+  const restingScale = pulseScale(ART.pulsePeriod * .7);
+  assert.ok(beatScale > restingScale);
+  assert.equal(pulseScale(.12, -1, true), 1);
+  assert.ok(pulseScale(.3, .05) >= 1);
+  assert.ok(gaussian(0, 0, 1) === 1);
 });

@@ -1,62 +1,83 @@
-import { HEART, getQuality } from './config.js';
-import { coreScale } from './heartbeat.js';
-import { buildLayers, drawTwinkles, drawShell } from './particles.js';
+import { ART, qualityFor, heartUnit } from './config.js';
+import { pulseScale } from './art/heartbeat.js';
+import { ParticleRenderer } from './gpu/renderer.js';
+import { CanvasFallback } from './fallback.js';
 
-const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
 export class HeartScene {
   constructor(canvas, zoomLabel) {
     this.canvas = canvas;
-    this.context = canvas.getContext('2d', { alpha: false });
-    this.zoomLabel = zoomLabel;
-    this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    this.width = 0;
-    this.height = 0;
-    this.unit = 0;
-    this.quality = null;
-    this.layers = null;
-    this.frameId = 0;
-    this.resizeId = 0;
-    this.detailId = 0;
-    this.startedAt = performance.now();
-    this.lastTouchAt = -Infinity;
-    this.lastFrameAt = this.startedAt;
+    this.label = zoomLabel;
+    this.reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    this.width = 1;
+    this.height = 1;
+    this.unit = 1;
     this.zoom = 1;
     this.targetZoom = 1;
-    this.renderZoom = 1;
     this.panX = 0;
     this.panY = 0;
+    this.startedAt = performance.now();
+    this.lastTap = -Infinity;
+    this.lastFrame = this.startedAt;
+    this.frameId = 0;
+    this.resizeId = 0;
     this.pointers = new Map();
     this.pinch = null;
+    this.quality = null;
+    this.frameSamples = 0;
+    this.sampleWindowStart = 0;
+    this.qualityReduced = false;
+
+    try {
+      this.renderer = new ParticleRenderer(canvas);
+      this.engine = 'WebGL2';
+    } catch (error) {
+      const replacement = canvas.cloneNode(false);
+      canvas.replaceWith(replacement);
+      this.canvas = replacement;
+      this.renderer = new CanvasFallback(replacement);
+      this.engine = 'Canvas2D';
+      console.info('Using compatible canvas renderer:', error.message);
+    }
 
     this.animate = this.animate.bind(this);
     this.onResize = this.onResize.bind(this);
     this.onVisibility = this.onVisibility.bind(this);
-    this.onMotionChange = this.onMotionChange.bind(this);
-    this.onWheel = this.onWheel.bind(this);
-    this.onPointerDown = this.onPointerDown.bind(this);
-    this.onPointerMove = this.onPointerMove.bind(this);
-    this.onPointerUp = this.onPointerUp.bind(this);
+    this.onMove = this.onMove.bind(this);
+    this.onDown = this.onDown.bind(this);
+    this.onUp = this.onUp.bind(this);
   }
 
   start() {
-    if (!this.context) return;
-
     this.resize();
     window.addEventListener('resize', this.onResize, { passive: true });
     document.addEventListener('visibilitychange', this.onVisibility);
-    this.reducedMotion.addEventListener('change', this.onMotionChange);
-    this.canvas.addEventListener('wheel', this.onWheel, { passive: false });
-    this.canvas.addEventListener('pointerdown', this.onPointerDown);
-    this.canvas.addEventListener('pointermove', this.onPointerMove);
-    this.canvas.addEventListener('pointerup', this.onPointerUp);
-    this.canvas.addEventListener('pointercancel', this.onPointerUp);
+    this.reduceMotion.addEventListener('change', () => {
+      this.stop();
+      this.draw(performance.now());
+      this.resume();
+    });
+
+    this.canvas.addEventListener('wheel', event => {
+      event.preventDefault();
+      const delta = clamp(event.deltaY, -180, 180);
+      this.setZoom(this.targetZoom * Math.exp(-delta * .00145));
+    }, { passive: false });
+
+    this.canvas.addEventListener('pointerdown', this.onDown);
+    this.canvas.addEventListener('pointermove', this.onMove);
+    this.canvas.addEventListener('pointerup', this.onUp);
+    this.canvas.addEventListener('pointercancel', this.onUp);
     this.canvas.addEventListener('dblclick', () => this.resetZoom());
+
     window.addEventListener('keydown', event => {
+      if (event.target instanceof HTMLButtonElement) return;
       if (event.key === '+' || event.key === '=') this.zoomIn();
       if (event.key === '-') this.zoomOut();
       if (event.key === '0') this.resetZoom();
     });
+
     this.resume();
   }
 
@@ -68,36 +89,22 @@ export class HeartScene {
   resize() {
     const width = Math.max(1, window.innerWidth);
     const height = Math.max(1, window.innerHeight);
-    if (width === this.width && height === this.height && this.layers) return;
+    if (this.width === width && this.height === height && this.quality) return;
 
     this.width = width;
     this.height = height;
-    this.unit = Math.min(width * .0275, height * .0235, HEART.maxUnit);
-    this.quality = getQuality(width, height);
-    const ratio = this.quality.pixelRatio;
-
-    this.canvas.width = Math.round(width * ratio);
-    this.canvas.height = Math.round(height * ratio);
-    this.canvas.style.width = width + 'px';
-    this.canvas.style.height = height + 'px';
-
-    this.layers = buildLayers(this.unit, this.quality, this.renderZoom);
+    this.unit = heartUnit(width, height);
+    this.quality = qualityFor(width, height, window.devicePixelRatio || 1);
+    this.renderer.resize(
+      width, height, this.quality.pixelRatio, this.quality.count
+    );
     this.draw(performance.now());
   }
 
   setZoom(value) {
-    this.targetZoom = clamp(value, HEART.minZoom, HEART.maxZoom);
-    this.zoomLabel.textContent = Math.round(this.targetZoom * 100) + '%';
-
-    if (this.targetZoom > this.renderZoom + .35) {
-      clearTimeout(this.detailId);
-      this.detailId = setTimeout(() => {
-        this.renderZoom = Math.min(2, this.targetZoom);
-        this.layers = buildLayers(this.unit, this.quality, this.renderZoom);
-      }, 220);
-    }
-
-    if (this.reducedMotion.matches) {
+    this.targetZoom = clamp(value, ART.zoomMin, ART.zoomMax);
+    this.label.textContent = Math.round(this.targetZoom * 100) + '%';
+    if (this.reduceMotion.matches) {
       this.zoom = this.targetZoom;
       this.draw(performance.now());
     }
@@ -117,49 +124,56 @@ export class HeartScene {
     this.setZoom(1);
   }
 
-  onWheel(event) {
-    event.preventDefault();
-    const factor = Math.exp(-clamp(event.deltaY, -160, 160) * .0014);
-    this.setZoom(this.targetZoom * factor);
-  }
-
-  onPointerDown(event) {
-    this.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
-    this.canvas.setPointerCapture(event.pointerId);
+  onDown(event) {
+    this.pointers.set(event.pointerId, {
+      x: event.clientX,
+      y: event.clientY
+    });
+    try { this.canvas.setPointerCapture(event.pointerId); } catch {}
 
     if (this.pointers.size === 2) {
-      const [first, second] = [...this.pointers.values()];
+      const [first, second] = this.pointers.values();
       this.pinch = {
-        distance: Math.max(1, Math.hypot(first.x - second.x, first.y - second.y)),
+        distance: Math.max(1, Math.hypot(
+          first.x - second.x, first.y - second.y
+        )),
         zoom: this.targetZoom
       };
     } else if (this.pointers.size === 1) {
-      this.lastTouchAt = performance.now();
+      this.lastTap = performance.now();
     }
-
-    if (this.reducedMotion.matches) this.draw(performance.now());
   }
 
-  onPointerMove(event) {
+  onMove(event) {
     const previous = this.pointers.get(event.pointerId);
     if (!previous) return;
-
-    this.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    this.pointers.set(event.pointerId, {
+      x: event.clientX,
+      y: event.clientY
+    });
 
     if (this.pointers.size === 2 && this.pinch) {
-      const [first, second] = [...this.pointers.values()];
-      const distance = Math.hypot(first.x - second.x, first.y - second.y);
+      const [first, second] = this.pointers.values();
+      const distance = Math.hypot(
+        first.x - second.x, first.y - second.y
+      );
       this.setZoom(this.pinch.zoom * distance / this.pinch.distance);
-    } else if (this.pointers.size === 1 && this.targetZoom > 1.06) {
+    } else if (this.pointers.size === 1 && this.targetZoom > 1.04) {
       const maxX = this.unit * 19 * (this.targetZoom - 1);
-      const maxY = this.unit * 18 * (this.targetZoom - 1);
-      this.panX = clamp(this.panX + event.clientX - previous.x, -maxX, maxX);
-      this.panY = clamp(this.panY + event.clientY - previous.y, -maxY, maxY);
-      if (this.reducedMotion.matches) this.draw(performance.now());
+      const maxY = this.unit * 20 * (this.targetZoom - 1);
+      this.panX = clamp(
+        this.panX + event.clientX - previous.x,
+        -maxX, maxX
+      );
+      this.panY = clamp(
+        this.panY + event.clientY - previous.y,
+        -maxY, maxY
+      );
+      if (this.reduceMotion.matches) this.draw(performance.now());
     }
   }
 
-  onPointerUp(event) {
+  onUp(event) {
     this.pointers.delete(event.pointerId);
     if (this.canvas.hasPointerCapture(event.pointerId)) {
       this.canvas.releasePointerCapture(event.pointerId);
@@ -172,18 +186,10 @@ export class HeartScene {
     else this.resume();
   }
 
-  onMotionChange() {
-    this.stop();
-    this.zoom = this.targetZoom;
-    this.draw(performance.now());
-    this.resume();
-  }
-
   resume() {
-    if (!document.hidden && !this.reducedMotion.matches && !this.frameId) {
-      this.lastFrameAt = performance.now();
-      this.frameId = requestAnimationFrame(this.animate);
-    }
+    if (document.hidden || this.reduceMotion.matches || this.frameId) return;
+    this.lastFrame = performance.now();
+    this.frameId = requestAnimationFrame(this.animate);
   }
 
   stop() {
@@ -193,53 +199,52 @@ export class HeartScene {
 
   animate(now) {
     this.frameId = 0;
-    const delta = Math.min(80, Math.max(0, now - this.lastFrameAt));
-    this.lastFrameAt = now;
-
-    const smoothing = 1 - Math.exp(-delta / 95);
+    const delta = clamp(now - this.lastFrame, 0, 80);
+    this.lastFrame = now;
+    const smoothing = 1 - Math.exp(-delta / 115);
     this.zoom += (this.targetZoom - this.zoom) * smoothing;
-    if (Math.abs(this.zoom - this.targetZoom) < .001) this.zoom = this.targetZoom;
+    if (Math.abs(this.zoom - this.targetZoom) < .001) {
+      this.zoom = this.targetZoom;
+    }
 
     this.draw(now);
+    this.frameSamples++;
+
+    if (!this.qualityReduced && this.engine === 'WebGL2') {
+      if (!this.sampleWindowStart) this.sampleWindowStart = now;
+      const time = now - this.sampleWindowStart;
+      if (time > 5500) {
+        if (this.frameSamples / (time / 1000) < 37) {
+          this.qualityReduced = true;
+          this.quality.pixelRatio = Math.max(
+            .9, this.quality.pixelRatio * .78
+          );
+          this.renderer.resize(
+            this.width, this.height, this.quality.pixelRatio,
+            this.quality.count
+          );
+        } else {
+          this.qualityReduced = true;
+        }
+      }
+    }
+
     this.frameId = requestAnimationFrame(this.animate);
   }
 
   draw(now) {
-    if (!this.layers) return;
+    const reduced = this.reduceMotion.matches;
+    const seconds = reduced ? 2.1 : (now - this.startedAt) / 1000;
+    const sinceTap = (now - this.lastTap) / 1000;
+    const beat = pulseScale(seconds, sinceTap, reduced) - 1;
 
-    const context = this.context;
-    const seconds = (now - this.startedAt) / 1000;
-    const reduced = this.reducedMotion.matches;
-    const fade = 1;
-    const beat = coreScale(seconds, (now - this.lastTouchAt) / 1000, reduced);
-    const ratio = this.quality.pixelRatio;
-
-    context.setTransform(ratio, 0, 0, ratio, 0, 0);
-    context.globalAlpha = 1;
-    context.globalCompositeOperation = 'source-over';
-    context.fillStyle = HEART.background;
-    context.fillRect(0, 0, this.width, this.height);
-
-    context.save();
-    context.translate(
-      this.width * .5 + this.panX,
-      this.height * .5 - this.unit * 1.8 + this.panY
-    );
-    context.scale(this.zoom, this.zoom);
-    context.globalCompositeOperation = 'screen';
-    context.globalAlpha = fade;
-
-    const core = this.layers.core;
-    context.save();
-    context.scale(beat, beat);
-    context.drawImage(core.canvas, -core.size / 2, -core.size / 2, core.size, core.size);
-    if (!reduced) drawTwinkles(context, this.layers.twinkles, seconds, this.unit);
-    context.restore();
-
-    drawShell(context, this.layers.shell, reduced ? 4.2 : seconds, this.unit);
-
-    context.restore();
-    context.globalAlpha = 1;
-    context.globalCompositeOperation = 'source-over';
+    this.renderer.render({
+      seconds, unit: this.unit,
+      zoom: this.zoom,
+      panX: this.panX,
+      panY: this.panY,
+      beat,
+      rays: ART.rays
+    });
   }
 }
