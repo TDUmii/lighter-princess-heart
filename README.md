@@ -1,42 +1,41 @@
-# A Heart Written in Code
+# Trái tim
 
-A full-screen, neon-pink particle heart inspired by the famous coding scene in **Lighter & Princess** (*Chiếc Bật Lửa và Váy Công Chúa*, episode 5).
+Hiệu ứng trái tim màu hồng trên nền đen được tạo từ các hạt sáng. Vòng ngoài giữ nguyên vị trí, phần lõi bên trong đập nhịp đôi.
 
-Một trái tim màu hồng được kết từ hàng nghìn hạt sáng, đập theo nhịp đôi trên nền đen, tương tự hiệu ứng được thấy trong phim.
+## Chạy thử
 
-## Live Demo
-
-https://tdumii.github.io/lighter-princess-heart/
-
-## Xem và chạy
-
-Mở `index.html` bằng trình duyệt. Không cần cài npm, Python, thư viện bên ngoài hay máy chủ.
-
-Hoặc chạy local server để thử trên điện thoại cùng mạng:
+Dùng một máy chủ tĩnh để hỗ trợ JavaScript modules:
 
 ```bash
 python -m http.server 8000
 ```
 
-Sau đó truy cập `http://localhost:8000` trên máy tính.
+Mở `http://localhost:8000`.
 
-## Tính năng
+## Cấu trúc
 
-- Trái tim hạt sáng tạo bằng HTML Canvas và công thức tham số toán học.
-- Hiệu ứng tụ hạt lúc mở trang, đập hai nhịp, hạt lấp lánh và ánh sáng lan tỏa.
-- Chạm hoặc nhấn chuột để trái tim đập mạnh hơn, di chuyển chuột để trái tim nghiêng nhẹ.
-- Tự co giãn theo màn hình điện thoại, máy tính; hạn chế số hạt và pixel ratio trên thiết bị nhỏ.
-- Hỗ trợ `prefers-reduced-motion` và tạm dừng khi trang không hiển thị.
-- Không chứa logo, lời đề tặng, thư viện hay tài nguyên từ phim.
+- `index.html`: trang web.
+- `styles.css`: giao diện.
+- `src/main.js`: điểm bắt đầu.
+- `src/scene.js`: khung hình và vòng lặp hoạt ảnh.
+- `src/particles.js`: tạo và vẽ các lớp hạt.
+- `src/geometry.js`: công thức hình trái tim và lấy mẫu.
+- `src/heartbeat.js`: nhịp tim.
+- `src/config.js`: màu sắc, kích thước và mật độ hạt.
+- `tests/`: kiểm thử những hàm không phụ thuộc trình duyệt.
 
-## Chỉnh sửa
+## Tùy chỉnh
 
-Màu hạt: sửa `palette` trong `heart.js`. Độ lớn: sửa `unit` trong hàm `resize`. Số lượng hạt: sửa `count` trong `buildParticles`. Tốc độ nhịp tim: sửa `heartbeat`.
+Điều chỉnh `coreParticles` và `shellParticles` trong `src/config.js` để thay đổi mật độ. Thay `beatStrength` để chỉnh độ mạnh của nhịp. Thay `coreSize` để chỉnh kích thước lõi.
 
-## Ghi chú
+Vòng ngoài được kết xuất một lần vào lớp Canvas riêng. Trong lúc chạy chỉ lõi được co giãn và các điểm sáng bên trong nhấp nháy. Trang không dùng thư viện ngoài.
 
-Đây là tác phẩm code được viết mới, **lấy cảm hứng từ** hiệu ứng trái tim trong phim, không phải video hay mã nguồn chính thức của đoàn phim. Không thể khẳng định giống 100% từng khung hình nếu không có bản gốc để đối chiếu.
+## Kiểm thử
 
-## License
+```bash
+npm test
+```
 
-MIT. See `LICENSE`.
+## Giấy phép
+
+MIT.
