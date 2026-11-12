@@ -1,30 +1,33 @@
 import { surfacePoint } from '../geometry.js';
 
+// Transient particles live on the rounded 3D skin. A loose preference
+// for the shoulders and sides makes the release visible from the front,
+// without collecting a bright, spiky ring at the notch or bottom tip.
 export function createBurstParticle(rand) {
-  let p = surfacePoint(rand);
-  // More of the transient little hearts start near the rounded silhouette,
-  // where their outward/inward 3D travel is actually visible from the front.
-  // Surface normals stay genuinely 3D; no flat, permanently bright ring.
-  // Keep most flying hearts away from the narrow bottom tip, where
-  // overlapping trails used to create the split/offset lower outline.
-  const rimScore = q => Math.hypot(q.nx, q.ny) * (q.y > 10.8 || q.y < -13.4 ? .35 : 1);
-  if (rand() < .70) {
-    let score = rimScore(p);
-    for (let tries = 0; tries < 9 && score < .88; tries++) {
-      const candidate = surfacePoint(rand);
-      const candidateScore = rimScore(candidate);
-      if (candidateScore > score) {
-        p = candidate;
-        score = candidateScore;
+  let point = surfacePoint(rand);
+  const suitability = p => {
+    const transverse = Math.hypot(p.nx, p.ny);
+    const topNotch = (p.y < -10 && Math.abs(p.x) < 3.2) ? .55 : 1;
+    const bottomTip = p.y > 10.7 ? .38 : 1;
+    return transverse * topNotch * bottomTip;
+  };
+  if (rand() < .52) {
+    let score = suitability(point);
+    for (let i=0; i<5 && score<.76; i++) {
+      const candidate=surfacePoint(rand);
+      const next=suitability(candidate);
+      if (next>score) {
+        point=candidate;
+        score=next;
       }
     }
   }
+  // Begin just under the skin, so each flight emerges gently.
   return {
-    x: p.x - p.nx * .25,
-    y: p.y - p.ny * .25,
-    z: p.z - p.nz * .25,
-    kind: 2,
-    nx: p.nx, ny: p.ny, nz: p.nz,
-    alpha: .23 + rand() * .22
+    x: point.x-point.nx*.12,
+    y: point.y-point.ny*.12,
+    z: point.z-point.nz*.12,
+    kind: 2, nx: point.nx,ny:point.ny,nz:point.nz,
+    alpha: .21+rand()*.16
   };
 }

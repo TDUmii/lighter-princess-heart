@@ -1,15 +1,15 @@
 export const HEART = Object.freeze({
   period: 0.90,
   mobileBreakpoint: 640,
-  desktop: { core: 8400, shell: 7800, rim: 520, burst: 780, dpr: 1.75 },
-  mobile: { core: 3650, shell: 3100, rim: 230, burst: 310, dpr: 1.42 },
+  desktop: { core: 8400, shell: 7800, rim: 290, burst: 1120, dpr: 1.75 },
+  mobile: { core: 3650, shell: 3100, rim: 125, burst: 450, dpr: 1.42 },
   zoomMin: 0.65,
   zoomMax: 4.5,
   seed: 20221104,
   bloom: 0.17,
   backgroundGlow: 0.26,
   shellMovement: 0.46,
-  burstTravel: 4.3,
+  burstTravel: 4.2,
   secretZoom: 2.40
 });
 

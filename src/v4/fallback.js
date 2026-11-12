@@ -100,9 +100,12 @@ export class CanvasRenderer {
         opacity=flightOpacity(phase,delay);
         if(opacity<=0)continue;
         const distance=flightDistance(phase,delay);
-        x+=nx*distance;
-        y+=ny*distance;
-        z+=nz*distance;
+        const organic=((Math.sin(seed*19.731)*43563.123)%1+1)%1;
+        const travel=distance*(.76+.32*organic);
+        const arc=Math.sin(Math.PI*distance/HEART.burstTravel);
+        x+=nx*travel-ny*arc*(organic-.5)*.58;
+        y+=ny*travel+nx*arc*(organic-.5)*.58;
+        z+=nz*travel+arc*.16*Math.sin(seed*2.21);
         // Outgoing and incoming hearts retain the same opacity.
       }
 
@@ -117,14 +120,15 @@ export class CanvasRenderer {
       const surfaceNormal=(kind===1||kind===3)?rotatePoint(nx,ny,nz,yaw,pitch):null;
       const grazing=surfaceNormal ? Math.max(0,1-Math.abs(surfaceNormal.z)) : 0;
       const rimGlow=kind===3
-        ? .04+.58*Math.pow(grazing,2.25)
-        : surfaceNormal ? .60+.98*Math.pow(grazing,1.55) : 1;
+        ? .025+.30*Math.pow(grazing,2.25)
+        : surfaceNormal ? .38+.80*Math.pow(grazing,1.55) : 1;
       ctx.globalAlpha=Math.min(1,alpha*(.75+.30*light)*opacity*rimGlow);
       ctx.fillStyle='rgb('+red+','+green+','+blue+')';
-      const d=Math.max(.65,size*(kind===2?1.45:kind===3?1.1:1.78)*Math.pow(zoom,.15));
-      const isLittleHeart=kind===2 || (((Math.sin(seed*93.271)*43758.5453)%1+1)%1 > .946);
-      if((zoom>2.25&&kind!==2)||isLittleHeart){
-        const heartSize=Math.max(1.6,d*(kind===2?2.1:2.25));
+      const d=Math.max(.55,size*(kind===2?1.20:kind===3?.88:1.68)*Math.pow(zoom,.15));
+      const symbol=((Math.sin(seed*93.271)*43758.5453)%1+1)%1;
+      const isLittleHeart=(kind===0 && symbol>.992) || (kind===2 && symbol>.83);
+      if((zoom>2.25&&kind<3)||isLittleHeart){
+        const heartSize=Math.max(1.4,d*(kind===2?1.55:2.0));
         ctx.drawImage(this.sprite,px-heartSize/2,py-heartSize/2,heartSize,heartSize);
       } else {
         ctx.beginPath();
