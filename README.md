@@ -9,7 +9,8 @@ Một trái tim **đỏ ruby** kết từ hàng nghìn hạt chuyển động nh
 - Hạt đỏ nhỏ, phân bố tự nhiên; đường viền không được vẽ thành một dải hạt đặc.
 - Mỗi hạt trôi và nhấp nháy riêng, giữ tổng thể trái tim ổn định.
 - Nhịp tim rất nhẹ như hơi thở. Mọi hạt dùng cùng một trường biến dạng liên tục giảm dần ra phía ngoài, **không có ranh giới giữa lõi và vỏ khi đập**.
-- Quầng sáng đỏ và chùm tia mềm được vẽ **phía sau toàn bộ khối trái tim**, không phụ thuộc vào các hạt phát sáng đơn lẻ.
+- Quầng sáng đỏ hồng rõ hơn và chùm tia mềm được vẽ **phía sau toàn bộ khối trái tim**, không phụ thuộc vào các hạt phát sáng đơn lẻ.
+- Chữ viết tay **“love you”** nằm ẩn ở giữa, chỉ hiện khi phóng to từ khoảng 245%, rõ khi zoom trên 330%.
 - Zoom bằng con lăn chuột, chụm hai ngón hoặc nút +/−; kéo khi đang phóng to, chọn 100% để đặt lại.
 - WebGL2 giúp GPU tính chuyển động; có Canvas 2D dự phòng và tự động hạ độ phân giải khi cần.
 

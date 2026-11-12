@@ -9,6 +9,7 @@ export class HeartScene {
   constructor(canvas, zoomLabel) {
     this.canvas = canvas;
     this.label = zoomLabel;
+    this.secret = document.querySelector('#secret-message');
     this.reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     this.width = 1;
     this.height = 1;
@@ -238,6 +239,20 @@ export class HeartScene {
     const sinceTap = (now - this.lastTap) / 1000;
     const beat = pulseScale(seconds, sinceTap, reduced) - 1;
 
+    if (this.secret) {
+      const amount = clamp((this.zoom - 2.45) / 0.85, 0, 1);
+      if (amount <= 0.001) {
+        if (this.secret.style.visibility !== 'hidden') {
+          this.secret.style.visibility = 'hidden';
+        }
+      } else {
+        this.secret.style.visibility = 'visible';
+        this.secret.style.opacity = (amount * .9).toFixed(3);
+        this.secret.style.left = (this.width * .5 + this.panX) + 'px';
+        this.secret.style.top = (this.height * .5 - this.unit * 1.8 + this.panY) + 'px';
+        this.secret.style.transform = 'translate(-50%, -50%) scale(' + (this.zoom * .68).toFixed(3) + ')';
+      }
+    }
     this.renderer.render({
       seconds, unit: this.unit,
       zoom: this.zoom,

@@ -28,3 +28,10 @@ Chỉ đánh dấu hoàn tất khi GitHub Pages báo build thành công, trang v
 - Kiểm tra ngưỡng nhịp qua kiểm thử trường biến dạng liên tục, bảo đảm không nhảy giữa core/shell.
 - Đo viewport giả lập điện thoại 390 × 844, WebGL2 hoạt động và zoom 100% > 124% > 100%.
 - Mục tiêu nhịp tự nhiên hơn, ánh sáng đỏ từ nền phía sau và giảm mật độ viền.
+
+## Cập nhật v2.2 - Tim nhỏ, ánh sáng và chữ bí mật
+- GPU WebGL2: shader từng hạt tạo hình tim theo phương trình trái tim, chỉ halo rìa giữ dạng đốm sáng.
+- Canvas dự phòng: tim nhỏ sử dụng sprite Bézier.
+- Chữ love you ẩn ở zoom 100-236%, xuất hiện từ khoảng 245% và rõ khi zoom trên 330%, đồng bộ pan/zoom.
+- Kiểm thử giả lập điện thoại 390x844: WebGL2 không lỗi; zoom 100, 124, 154, 191, 236, 293, 364, 450% đúng trạng thái; 12/12 unit tests.
+- 60 FPS được đo trên môi trường trình duyệt thử nghiệm, chưa đại diện cho điện thoại thực.

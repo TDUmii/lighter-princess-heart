@@ -5,12 +5,12 @@ export const ART = Object.freeze({
   pulseStrength: 0.034,
   touchPulse: 0.026,
   zoomMin: 0.65,
-  zoomMax: 3.3,
+  zoomMax: 4.5,
   desktopParticles: 26000,
   mobileParticles: 11000,
   baseColor: [0.95, 0.10, 0.14],
   glows: 0.35,
-  rays: 0.34
+  rays: 0.76
 });
 
 export function qualityFor(width, height, deviceRatio = 1) {

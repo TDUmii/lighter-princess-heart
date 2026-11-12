@@ -50,3 +50,8 @@ Không chép khung hình phim, âm thanh hay mã nguồn của bên thứ ba và
 - Màu đỏ ruby từ shader, giảm hẳn bloom từng hạt.
 - Loại bỏ nhánh biến dạng theo layer: mọi hạt dùng một trường softBreathWeight liên tục.
 - Mờ nền từ ba vùng sau toàn bộ trái tim và những tia sáng đỏ mềm, cường độ thấp.
+
+## Cập nhật v2.2 - Tim nhỏ và thông điệp bí mật
+- Dùng công thức ẩn hình trái tim trong fragment shader để vẽ từng tim nhỏ, không thay bằng chấm tròn.
+- Chuyển màu đỏ hồng sáng và tăng hào quang/tia sáng phía sau, không tăng sáng hạt đơn lẻ quá mạnh.
+- Chữ love you phong cách thư pháp, ẩn mặc định, xuất hiện từ zoom khoảng 245%, rõ ở 330% trở lên.

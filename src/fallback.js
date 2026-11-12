@@ -11,6 +11,17 @@ export class CanvasFallback {
     this.ratio = 1;
     this.width = 0;
     this.height = 0;
+    this.sprite = document.createElement('canvas');
+    this.sprite.width = this.sprite.height = 48;
+    const brush = this.sprite.getContext('2d');
+    brush.fillStyle = '#ff4662';
+    brush.beginPath();
+    brush.moveTo(24, 40);
+    brush.bezierCurveTo(16, 34, 5, 27, 5, 16);
+    brush.bezierCurveTo(5, 7, 16, 3, 24, 13);
+    brush.bezierCurveTo(32, 3, 43, 7, 43, 16);
+    brush.bezierCurveTo(43, 27, 32, 34, 24, 40);
+    brush.fill();
   }
 
   resize(width, height, ratio, count) {
@@ -101,8 +112,13 @@ export class CanvasFallback {
       ctx.fillStyle = 'rgb(' + red + ',' + green + ',' + blue + ')';
       const px = x * unit;
       const py = y * unit;
-      const pixelSize = Math.max(.55, size * .9);
-      ctx.fillRect(px - pixelSize / 2, py - pixelSize / 2, pixelSize, pixelSize);
+      if (points[i + 2] < 1.5) {
+        const heartSize = Math.max(1.6, size * 2.75);
+        ctx.drawImage(this.sprite, px - heartSize / 2, py - heartSize / 2, heartSize, heartSize);
+      } else {
+        const pixelSize = Math.max(.55, size * .9);
+        ctx.fillRect(px - pixelSize / 2, py - pixelSize / 2, pixelSize, pixelSize);
+      }
     }
 
     ctx.restore();

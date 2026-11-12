@@ -4,19 +4,23 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
   <meta name="theme-color" content="#000000">
-  <meta name="description" content="Trái tim phát sáng với hàng nghìn hạt màu hồng và nhịp đập dịu nhẹ.">
+  <meta name="description" content="Trái tim đỏ hồng lung linh với những trái tim nhỏ và lời nhắn ẩn.">
   <meta property="og:title" content="Trái tim">
   <meta property="og:description" content="Một trái tim phát sáng giữa nền đen.">
   <meta property="og:type" content="website">
   <title>Trái tim</title>
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css">
   <script type="module" src="./src/main.js"></script>
 </head>
 <body>
   <main class="stage" aria-label="Trái tim phát sáng">
     <h1 class="sr-only">Trái tim</h1>
-    <canvas id="heart" aria-label="Trái tim hồng đang đập nhịp bên trong"></canvas>
+    <canvas id="heart" aria-label="Trái tim đỏ hồng được ghép bởi những trái tim nhỏ"></canvas>
+    <div id="secret-message" class="secret-message" aria-hidden="true"><span>love you</span></div>
     <div class="zoom-controls" role="group" aria-label="Điều chỉnh kích thước trái tim">
       <button id="zoom-out" type="button" aria-label="Thu nhỏ" title="Thu nhỏ">−</button>
       <button id="zoom-reset" type="button" aria-label="Trở về 100%" title="Đặt lại mức zoom">100%</button>

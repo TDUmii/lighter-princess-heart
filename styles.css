@@ -116,3 +116,29 @@ body {
     bottom: max(12px, env(safe-area-inset-bottom));
   }
 }
+
+.secret-message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  will-change: transform, opacity;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.secret-message span {
+  display: block;
+  color: #ffb7b7;
+  font-family: 'Great Vibes', 'Brush Script MT', 'Segoe Script', cursive;
+  font-weight: 400;
+  font-size: clamp(23px, 2.8vw, 29px);
+  line-height: 1.5;
+  text-shadow:
+    0 0 5px rgba(255, 115, 130, .8),
+    0 0 15px rgba(255, 50, 92, .35);
+}
