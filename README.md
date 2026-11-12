@@ -120,3 +120,12 @@ Cảnh phim chỉ cung cấp ảnh/video tham khảo; đây không phải mã ng
 - Các hạt quay về sáng và lớn hơn nhẹ để dễ phân biệt; chuyển động nén cả khối vẫn giữ nguyên.
 - Không tự xoay; nút **⟲ Chính diện** vẫn ở giữa. Chữ `love you` chỉ hiện khi zoom sâu.
 - [Báo cáo kiểm thử v4.6](./V4_6_QA.md).
+
+## Phiên bản 4.7 — Bay ra bằng bay về, nhịp tim cân đối
+
+- Sửa sai lệch của 4.6: **hạt bay ra và bay về dùng cùng một quỹ đạo 3D**, cùng quãng đường tối đa **6 đơn vị**, không có cảnh hạt đột ngột xuất hiện ở xa tim.
+- Hai nửa chuyển động bằng nhau, mỗi nửa 0,445 chu kỳ; hạt bay ra đến điểm xa nhất rồi **đảo chiều và bay về đúng vị trí xuất phát** trên bề mặt 3D.
+- Tăng độ rõ của hạt bay ra ở vùng viền tim, giữ nguyên chiều sâu của cả khối; kích thước và độ sáng trái tim mini giống nhau ở hai chiều.
+- Biên độ co/nở của tim được cân thành **−11,5% / +11,5%** (tại điểm có trọng số 1), thay vì co mạnh hơn nở.
+- Giữ xoay thủ công, nút **⟲ Chính diện** và dòng chữ `love you` chỉ hiện khi zoom sâu.
+- [Báo cáo kiểm thử và so sánh v4.7](./V4_7_QA.md).

@@ -2,14 +2,26 @@ import { HEART } from './config.js';
 
 export const PULSE_KEYFRAMES = Object.freeze([
   [0.00,  0.000],
-  [0.150, -0.132],
-  [0.320,  0.103],
-  [0.515, -0.029],
-  [0.685,  0.018],
+  [0.150, -0.115],
+  [0.320,  0.115],
+  [0.515, -0.024],
+  [0.685,  0.016],
   [1.00,  0.000]
 ]);
 
-function ease(t) {
+// Each miniature heart travels on one uninterrupted out-and-back path:
+// phase .245 -> .690 -> 1.135 (two equal-length legs of .445 cycles).
+// The small seeded start offset only staggers the hearts; each heart
+// always returns along its own outbound 3D surface normal.
+export const FLIGHT = Object.freeze({
+  start: .245,
+  leg: .445,
+  stagger: .50,
+  fadeIn: .23,
+  fadeOut: 1.77
+});
+
+export function ease(t) {
   const c = Math.max(0, Math.min(1, t));
   return c * c * (3 - 2 * c);
 }
@@ -30,30 +42,46 @@ export function heartbeat(seconds) {
   return 0;
 }
 
-export function burstStrength(phase, delay = 0) {
-  const p = (phase - .30 - delay) / .355;
-  if (p <= 0 || p >= 1) return 0;
-  return Math.sin(Math.PI * p) ** 1.45;
+// Treat the end of a heartbeat and the start of the next as the same
+// continuous timeline, avoiding teleportation at phase 1 -> 0.
+export function flightProgress(phase, delay = 0) {
+  const p = ((phase % 1) + 1) % 1;
+  const timeline = p < .20 ? p + 1 : p;
+  const launch = FLIGHT.start + (delay - .075) * FLIGHT.stagger;
+  return (timeline - launch) / FLIGHT.leg;
 }
 
-// The expelled mini-hearts reappear outside the surface in the final part
-// of a beat, then fly back along their actual 3D normals as contraction starts.
-// Unwrap the cycle around phase zero so the homeward path never jumps.
+export function flightDistance(phase, delay = 0) {
+  const p = flightProgress(phase, delay);
+  if (p <= 0 || p >= 2) return 0;
+  const half = p <= 1 ? p : 2 - p;
+  return HEART.burstTravel * ease(half);
+}
+
+export function flightOpacity(phase, delay = 0) {
+  const p = flightProgress(phase, delay);
+  if (p <= 0 || p >= 2) return 0;
+  const entrance = ease(p / FLIGHT.fadeIn);
+  const exit = 1 - ease((p - FLIGHT.fadeOut) / (2 - FLIGHT.fadeOut));
+  return entrance * exit;
+}
+
+export function burstStrength(phase, delay = 0) {
+  const p = flightProgress(phase, delay);
+  return p > 0 && p <= 1 ? flightOpacity(phase, delay) : 0;
+}
+
 export function returnProgress(phase, delay = 0) {
-  const wrapped = phase > .65 ? phase - 1 : phase;
-  const shift = (delay - .075) * .36;
-  return (wrapped + .18 - shift) / .36;
+  return flightProgress(phase, delay) - 1;
 }
 
 export function returnStrength(phase, delay = 0) {
-  const progress = returnProgress(phase, delay);
-  if (progress <= 0 || progress >= 1) return 0;
-  return Math.sin(Math.PI * progress) ** .72;
+  const p = flightProgress(phase, delay);
+  return p > 1 && p < 2 ? flightOpacity(phase, delay) : 0;
 }
 
 export function returnDistance(phase, delay = 0) {
-  const t = ease(returnProgress(phase, delay));
-  return HEART.returnTravel * (1 - t) - HEART.returnInset * t;
+  return flightDistance(phase, delay);
 }
 
 export function deformScale(kind, radial, beat) {

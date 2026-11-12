@@ -10,12 +10,12 @@ const source = (relative) => readFileSync(new URL(relative, import.meta.url),'ut
 test('contraction is visibly stronger than before at all shell depths', () => {
   const minimum = heartbeat(HEART.period * .15);
   const maximum = heartbeat(HEART.period * .32);
-  assert.ok(minimum <= -.13);
+  assert.ok(minimum <= -.114);
   assert.ok(maximum >= .10);
-  assert.ok(deformScale(1, 0, minimum) < .89);
-  assert.ok(deformScale(1, 1, minimum) < .89);
-  assert.ok(deformScale(0, .3, minimum) < .86);
-  assert.ok(deformScale(0, .9, minimum) < .88);
+  assert.ok(deformScale(1, 0, minimum) < .90);
+  assert.ok(deformScale(1, 1, minimum) < .90);
+  assert.ok(deformScale(0, .3, minimum) < .88);
+  assert.ok(deformScale(0, .9, minimum) < .89);
   assert.ok(deformScale(1, 0, maximum) > 1.09);
   assert.ok(Math.abs(heartbeat(0)-heartbeat(HEART.period)) < 1e-8);
 });

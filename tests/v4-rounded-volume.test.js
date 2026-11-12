@@ -48,7 +48,7 @@ test('shell and burst wrap the 3D body instead of staying on a flat contour',()=
   assert.ok(shellBack>250);
   assert.ok(burstZ>180);
   assert.equal(STRIDE,13);
-  assert.match(pointVertex,/normalZ \* uBurstTravel \* flight/);
+  assert.match(pointVertex,/p\.xyz \+= vec3\(normal,normalZ\)\*travel/);
 });
 
 test('center message remains hidden at normal zoom and not tied to orbit angle',()=>{

@@ -9,9 +9,7 @@ export const HEART = Object.freeze({
   bloom: 0.17,
   backgroundGlow: 0.26,
   shellMovement: 0.46,
-  burstTravel: 3.40,
-  returnTravel: 7.2,
-  returnInset: 1.6,
+  burstTravel: 6.0,
   secretZoom: 2.40
 });
 

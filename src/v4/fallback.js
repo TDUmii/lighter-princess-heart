@@ -1,6 +1,6 @@
 import { HEART } from './config.js';
 import { createParticleSystems, STRIDE } from './particles.js';
-import { beatPhase, burstStrength, returnStrength, returnDistance, deformScale } from './heartbeat.js';
+import { beatPhase, flightProgress, flightOpacity, flightDistance, deformScale } from './heartbeat.js';
 import { rotatePoint, perspectiveScale } from './camera.js';
 
 function makeSprite() {
@@ -95,19 +95,14 @@ export class CanvasRenderer {
 
       let opacity=1;
       if (kind===2) {
-        const age=(phase-.30-delay)/.355;
-        const outward=burstStrength(phase,delay);
-        const homeward=returnStrength(phase,delay);
-        const returning=homeward>outward;
-        opacity=Math.max(outward,homeward);
+        const progress=flightProgress(phase,delay);
+        opacity=flightOpacity(phase,delay);
         if(opacity<=0)continue;
-        const distance=returning
-          ? returnDistance(phase,delay)
-          : HEART.burstTravel*Math.pow(Math.max(0,Math.min(1,age)),.72);
+        const distance=flightDistance(phase,delay);
         x+=nx*distance;
         y+=ny*distance;
         z+=nz*distance;
-        if(returning)opacity*=1.28;
+        // Outgoing and incoming hearts retain the same opacity.
       }
 
       const rotated=rotatePoint(x,y,z,yaw,pitch);

@@ -80,7 +80,7 @@ test('burst is a brief outward pulse at the rim, not continuous fireworks', () =
   assert.equal(burstStrength(.13),0);
   assert.ok(burstStrength(.49)>.8);
   assert.equal(burstStrength(.85),0);
-  assert.equal(burstStrength(.42,.15),0);
+  assert.ok(burstStrength(.42,.15)>0);
   assert.ok(burstStrength(.58,.13)>0);
 });
 
