@@ -1,10 +1,8 @@
 # Trái tim
 
-Hiệu ứng trái tim màu hồng trên nền đen được tạo từ các hạt sáng. Vòng ngoài giữ nguyên vị trí, phần lõi bên trong đập nhịp đôi.
+Trái tim màu hồng phát sáng trên nền đen. Giao diện giữ phong cách hạt sáng mịn: các hạt vòng ngoài trôi nhẹ và nhấp nháy như bản đầu, trong khi viền tim không co giãn. Chỉ lõi phía trong đập hai nhịp.
 
-## Chạy thử
-
-Dùng một máy chủ tĩnh để hỗ trợ JavaScript modules:
+## Chạy
 
 ```bash
 python -m http.server 8000
@@ -12,23 +10,26 @@ python -m http.server 8000
 
 Mở `http://localhost:8000`.
 
+## Tương tác
+
+- Cuộn con lăn hoặc nhấn +/− để phóng to/thu nhỏ.
+- Chụm hoặc mở hai ngón tay trên điện thoại để zoom.
+- Kéo để xem các khu vực khác khi phóng to.
+- Nhấn 100% hoặc nhấp đúp vào nền để đặt lại.
+- Chạm trái tim để tạo thêm nhịp đập.
+
 ## Cấu trúc
 
-- `index.html`: trang web.
-- `styles.css`: giao diện.
-- `src/main.js`: điểm bắt đầu.
-- `src/scene.js`: khung hình và vòng lặp hoạt ảnh.
-- `src/particles.js`: tạo và vẽ các lớp hạt.
-- `src/geometry.js`: công thức hình trái tim và lấy mẫu.
-- `src/heartbeat.js`: nhịp tim.
-- `src/config.js`: màu sắc, kích thước và mật độ hạt.
-- `tests/`: kiểm thử những hàm không phụ thuộc trình duyệt.
-
-## Tùy chỉnh
-
-Điều chỉnh `coreParticles` và `shellParticles` trong `src/config.js` để thay đổi mật độ. Thay `beatStrength` để chỉnh độ mạnh của nhịp. Thay `coreSize` để chỉnh kích thước lõi.
-
-Vòng ngoài được kết xuất một lần vào lớp Canvas riêng. Trong lúc chạy chỉ lõi được co giãn và các điểm sáng bên trong nhấp nháy. Trang không dùng thư viện ngoài.
+- `index.html`: bố cục và điều khiển zoom.
+- `styles.css`: giao diện tối giản.
+- `src/main.js`: khởi tạo và gắn sự kiện cho nút.
+- `src/scene.js`: vẽ, phóng to, thao tác chuột và cảm ứng.
+- `src/particles.js`: hạt của lớp vỏ và lõi.
+- `src/motion.js`: chuyển động và độ sáng của hạt vòng ngoài.
+- `src/geometry.js`: công thức trái tim.
+- `src/heartbeat.js`: nhịp đập đôi.
+- `src/config.js`: mật độ hạt, màu sắc, zoom.
+- `tests/`: kiểm thử.
 
 ## Kiểm thử
 

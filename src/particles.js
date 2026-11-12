@@ -1,49 +1,111 @@
-import { COLORS, HEART } from './config.js';
-import { insidePoint, outlinePoint, seededRandom } from './geometry.js';
+import { COLORS } from './config.js';
+import { isInsideHeart, outlinePoint, seededRandom } from './geometry.js';
+import { particlePosition, particleOpacity } from './motion.js';
 
-function makeCanvas(unit, pixelRatio) {
-  const cssSize = unit * 43;
+const SIZE_IN_UNITS = 46;
+
+function createSurface(unit, quality, detailZoom) {
+  const size = unit * SIZE_IN_UNITS;
+  const maxPixels = quality.mobile ? 1800 : 2560;
+  const ratio = Math.min(
+    quality.pixelRatio * Math.min(detailZoom, 2),
+    quality.mobile ? 2.6 : 2.85,
+    maxPixels / size
+  );
+
   const canvas = document.createElement('canvas');
-  canvas.width = Math.ceil(cssSize * pixelRatio);
-  canvas.height = Math.ceil(cssSize * pixelRatio);
+  canvas.width = Math.max(1, Math.round(size * ratio));
+  canvas.height = Math.max(1, Math.round(size * ratio));
+
   const context = canvas.getContext('2d', { alpha: true });
   context.setTransform(
-    pixelRatio, 0, 0, pixelRatio,
+    ratio, 0, 0, ratio,
     canvas.width / 2, canvas.height / 2
   );
-  context.globalCompositeOperation = 'lighter';
-  return { canvas, context, size: cssSize };
+  context.globalCompositeOperation = 'screen';
+
+  return { canvas, context, size };
 }
 
-function makeGlowSprite() {
+function createGlowSprite() {
   const sprite = document.createElement('canvas');
-  sprite.width = 48;
-  sprite.height = 48;
+  sprite.width = 56;
+  sprite.height = 56;
+
   const context = sprite.getContext('2d');
-  const glow = context.createRadialGradient(24, 24, 0, 24, 24, 24);
-  glow.addColorStop(0, 'rgba(255,218,238,0.9)');
-  glow.addColorStop(0.14, 'rgba(255,122,187,0.46)');
-  glow.addColorStop(0.5, 'rgba(246,57,139,0.10)');
-  glow.addColorStop(1, 'rgba(255,50,131,0)');
-  context.fillStyle = glow;
-  context.fillRect(0, 0, 48, 48);
+  const gradient = context.createRadialGradient(28, 28, 0, 28, 28, 28);
+  gradient.addColorStop(0, 'rgba(255,190,223,.92)');
+  gradient.addColorStop(.17, 'rgba(255,123,181,.65)');
+  gradient.addColorStop(.43, 'rgba(253,77,158,.15)');
+  gradient.addColorStop(1, 'rgba(255,57,134,0)');
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, 56, 56);
+
   return sprite;
 }
 
-const glowSprite = makeGlowSprite();
+const glowSprite = createGlowSprite();
 
-function drawParticle(context, random, x, y, unit, shell) {
-  const bright = random();
-  const big = bright > 0.984;
-  const size = (big ? 1.35 + random() * 1.35 : 0.42 + random() * 1.05)
-    * Math.max(0.70, unit / 18);
-  const alpha = shell
-    ? 0.26 + random() * 0.53
-    : 0.29 + random() * 0.55;
+function createParticle(kind, random) {
+  const anchor = outlinePoint(random);
+  let factor;
 
-  if (big) {
-    const glowSize = size * (shell ? 7 : 8);
-    context.globalAlpha = alpha * 0.63;
+  if (kind === 'edge') factor = .968 + random() * .075;
+  else if (kind === 'halo') factor = 1.015 + Math.pow(random(), 1.85) * .24;
+  else factor = 1;
+
+  const scatter = kind === 'halo' ? 1.12 : kind === 'edge' ? .14 : .35;
+  let x = anchor.x * factor + (random() - .5) * scatter;
+  let y = anchor.y * factor + (random() - .5) * scatter;
+
+  if (kind === 'fill') {
+    do {
+      x = (random() * 2 - 1) * 15.95;
+      y = random() * 29.2 - 12.1;
+    } while (!isInsideHeart(x, y));
+  }
+
+  const depth = random() * 2 - 1;
+  const glow = random();
+  const particle = {
+    kind,
+    x,
+    y,
+    depth,
+    glow,
+    color: COLORS[Math.floor(random() * COLORS.length)],
+    size: (kind === 'halo' ? .57 : .85) +
+      Math.pow(random(), 2) * (glow > .965 ? 2.1 : 1.32),
+    alpha: kind === 'halo' ? .12 + random() * .46 : .52 + random() * .45,
+    seed: random() * Math.PI * 2,
+    speed: .55 + random() * 1.4,
+    drift: .12 + random() * (kind === 'halo' ? .64 : .21)
+  };
+
+  random();
+  random();
+  random();
+
+  return particle;
+}
+
+function paintParticle(surface, particle, unit) {
+  const context = surface.context;
+  const frozenSeconds = 4.2;
+  const movement = frozenSeconds * .6;
+  const driftX = Math.sin(movement * particle.speed + particle.seed) * particle.drift;
+  const driftY = Math.cos(movement * particle.speed * .82 + particle.seed) * particle.drift;
+  const depthScale = 1 + particle.depth * .045;
+  const x = (particle.x + driftX) * depthScale * unit;
+  const y = (particle.y + driftY) * depthScale * unit;
+  const flicker = .77 + .23 * Math.sin(
+    frozenSeconds * (1.8 + particle.speed) + particle.seed * 2.7
+  );
+  const alpha = particle.alpha * flicker;
+
+  if (particle.glow > .968 && particle.kind !== 'halo') {
+    const glowSize = (5 + particle.glow * 8) * (unit / 16);
+    context.globalAlpha = alpha * .7;
     context.drawImage(
       glowSprite,
       x - glowSize / 2, y - glowSize / 2,
@@ -51,106 +113,111 @@ function drawParticle(context, random, x, y, unit, shell) {
     );
   }
 
-  context.fillStyle = COLORS[Math.floor(random() * COLORS.length)];
   context.globalAlpha = alpha;
+  context.fillStyle = particle.color;
+  const size = particle.size * Math.max(.70, unit / 16);
   context.fillRect(x - size / 2, y - size / 2, size, size);
 }
 
-function makeShell(unit, quality) {
-  const layer = makeCanvas(unit, quality.pixelRatio);
-  const random = seededRandom(81021);
-  const context = layer.context;
-
-  for (let i = 0; i < quality.shellParticles; i++) {
-    const point = outlinePoint(random);
-    const category = random();
-    let radius;
-    let jitter;
-
-    if (category < 0.16) {
-      radius = 1.055 + Math.pow(random(), 1.65) * 0.16;
-      jitter = 0.22;
-    } else if (category < 0.69) {
-      radius = 0.962 + random() * HEART.shellThickness;
-      jitter = 0.24;
-    } else {
-      radius = 0.982 + random() * 0.041;
-      jitter = 0.09;
-    }
-
-    const x = (point.x * radius + (random() - 0.5) * jitter) * unit;
-    const y = (point.y * radius + (random() - 0.5) * jitter) * unit;
-    drawParticle(context, random, x, y, unit, true);
-  }
-
-  context.globalAlpha = 1;
-  context.globalCompositeOperation = 'source-over';
-  return layer;
-}
-
-function makeCore(unit, quality) {
-  const layer = makeCanvas(unit, quality.pixelRatio);
-  const context = layer.context;
-  const random = seededRandom(291104);
-
-  const glow = context.createRadialGradient(0, -unit, unit * 2,
-    0, -unit, unit * 16);
-  glow.addColorStop(0, 'rgba(243,45,142,0.075)');
-  glow.addColorStop(0.75, 'rgba(230,35,120,0.025)');
-  glow.addColorStop(1, 'rgba(230,35,120,0)');
-  context.fillStyle = glow;
-  context.beginPath();
-  context.arc(0, 0, unit * 16, 0, Math.PI * 2);
-  context.fill();
-
-  for (let i = 0; i < quality.coreParticles; i++) {
-    const point = insidePoint(random);
-    const depth = 0.92 + random() * 0.13;
-    const x = point.x * HEART.coreSize * depth * unit;
-    const y = point.y * HEART.coreSize * depth * unit;
-    drawParticle(context, random, x, y, unit, false);
-  }
-
-  context.globalAlpha = 1;
-  context.globalCompositeOperation = 'source-over';
-  return layer;
-}
-
 function makeTwinkles(unit, count) {
-  const random = seededRandom(65189);
-  return Array.from({ length: count }, () => {
-    const point = insidePoint(random);
-    return {
-      x: point.x * HEART.coreSize * unit,
-      y: point.y * HEART.coreSize * unit,
+  const random = seededRandom(8729);
+  const points = [];
+
+  for (let i = 0; i < count; i++) {
+    let x;
+    let y;
+    do {
+      x = (random() * 2 - 1) * 15.95;
+      y = random() * 29.2 - 12.1;
+    } while (!isInsideHeart(x / .83, y / .83));
+
+    points.push({
+      x: x * unit,
+      y: y * unit,
       phase: random() * Math.PI * 2,
-      speed: 1.8 + random() * 2.5,
-      radius: 0.48 + random() * 1.14
-    };
-  });
+      speed: 1.35 + random() * 2.3,
+      radius: .45 + random() * .72
+    });
+  }
+
+  return points;
 }
 
-export function buildLayers(unit, quality) {
+export function buildLayers(unit, quality, detailZoom = 1) {
+  const shell = [];
+  const core = createSurface(unit, quality, detailZoom);
+  const random = seededRandom(20221104);
+
+  for (let i = 0; i < quality.haloParticles; i++) {
+    shell.push(createParticle('halo', random));
+  }
+
+  for (let i = 0; i < quality.fillParticles; i++) {
+    const particle = createParticle('fill', random);
+    const isCore = isInsideHeart(
+      particle.x / .86,
+      particle.y / .86
+    );
+    if (isCore) paintParticle(core, particle, unit);
+    else shell.push(particle);
+  }
+
+  for (let i = 0; i < quality.edgeParticles; i++) {
+    shell.push(createParticle('edge', random));
+  }
+
   return {
-    shell: makeShell(unit, quality),
-    core: makeCore(unit, quality),
+    shell,
+    core,
     twinkles: makeTwinkles(unit, quality.shimmerParticles)
   };
 }
 
 export function drawTwinkles(context, points, seconds, unit) {
-  context.fillStyle = '#ffe0f0';
-  const sizeRatio = Math.max(0.7, unit / 18);
+  const density = Math.max(.7, unit / 16);
+  context.fillStyle = '#ffd4ea';
 
   for (const point of points) {
-    const flicker = Math.pow(
-      Math.max(0, Math.sin(seconds * point.speed + point.phase)), 4
+    const light = Math.pow(
+      Math.max(0, Math.sin(seconds * point.speed + point.phase)),
+      5
     );
-    if (flicker < 0.06) continue;
+    if (light < .12) continue;
 
-    const size = point.radius * sizeRatio;
-    context.globalAlpha = flicker * 0.74;
+    context.globalAlpha = light * .46;
+    const size = point.radius * density;
     context.fillRect(point.x - size / 2, point.y - size / 2, size, size);
+  }
+
+  context.globalAlpha = 1;
+}
+
+export function drawShell(context, particles, seconds, unit) {
+  const sizeRatio = Math.max(0.70, unit / 16);
+
+  for (const particle of particles) {
+    const point = particlePosition(particle, seconds, unit);
+    const alpha = particleOpacity(particle, seconds);
+
+    if (particle.glow > .968 && particle.kind !== 'halo') {
+      const glowSize = (5 + particle.glow * 8) * (unit / 16);
+      context.globalAlpha = alpha * .7;
+      context.drawImage(
+        glowSprite,
+        point.x - glowSize / 2,
+        point.y - glowSize / 2,
+        glowSize, glowSize
+      );
+    }
+
+    context.globalAlpha = alpha;
+    context.fillStyle = particle.color;
+    const size = particle.size * sizeRatio;
+    context.fillRect(
+      point.x - size / 2,
+      point.y - size / 2,
+      size, size
+    );
   }
 
   context.globalAlpha = 1;

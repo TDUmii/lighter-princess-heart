@@ -1,26 +1,30 @@
 export const COLORS = [
-  '#ff80b4', '#ff6aaa', '#ffa1cc', '#f55a9c',
-  '#ffd0e4', '#f43d8c', '#ec6bac', '#ffc1db'
+  '#ff8cbd', '#ff6aa7', '#ffa5ce', '#f578af',
+  '#ffd1e6', '#f44d97', '#e95b9d', '#ffc0da'
 ];
 
 export const HEART = {
-  mobileBreakpoint: 640,
-  maxUnit: 25,
-  shellThickness: 0.17,
-  coreSize: 0.87,
-  beatInterval: 1.54,
-  beatStrength: 0.075,
+  mobileBreakpoint: 550,
+  maxUnit: 21,
+  coreSize: 1,
+  beatInterval: 1.62,
+  beatStrength: 0.105,
   touchStrength: 0.085,
+  minZoom: 0.65,
+  maxZoom: 3.3,
   background: '#000000'
 };
 
 export function getQuality(width, height) {
   const mobile = Math.min(width, height) < HEART.mobileBreakpoint;
+  const total = mobile ? 6200 : 14500;
+
   return {
     mobile,
-    pixelRatio: Math.min(window.devicePixelRatio || 1, mobile ? 1.6 : 2),
-    coreParticles: mobile ? 14500 : 29000,
-    shellParticles: mobile ? 5800 : 11800,
-    shimmerParticles: mobile ? 55 : 100
+    pixelRatio: Math.min(window.devicePixelRatio || 1, mobile ? 1.7 : 2),
+    haloParticles: Math.floor(total * .15),
+    fillParticles: Math.floor(total * .73),
+    edgeParticles: Math.floor(total * .12),
+    shimmerParticles: mobile ? 30 : 55
   };
 }
