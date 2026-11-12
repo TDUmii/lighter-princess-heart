@@ -14,7 +14,7 @@ export const ART = Object.freeze({
 });
 
 export function qualityFor(width, height, deviceRatio = 1) {
-  const mobile = Math.min(width, height) < ART.mobileBreakpoint;
+  const mobile = width < ART.mobileBreakpoint;
   const ratio = Math.min(deviceRatio, mobile ? 1.45 : 1.8);
   return {
     mobile,
@@ -25,8 +25,8 @@ export function qualityFor(width, height, deviceRatio = 1) {
 }
 
 export function heartUnit(width, height) {
-  const mobile = Math.min(width, height) < ART.mobileBreakpoint;
+  const mobile = width < ART.mobileBreakpoint;
   return mobile
     ? Math.min(width / 43.5, height / 44, 21)
-    : Math.min(width / 51, height / 49, 21);
+    : Math.min(width / 51, height / 44, 21);
 }

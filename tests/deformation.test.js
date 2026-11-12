@@ -4,15 +4,15 @@ import { deformPoint, radialBeatWeight } from '../src/art/deformation.js';
 import { ART } from '../src/config.js';
 import { particleVertex, skyFragment, particleFragment } from '../src/gpu/shaders.js';
 
-test('radial deformation is continuous with stronger motion near the edge', () => {
-  assert.ok(radialBeatWeight(0, 1) >= .45);
-  assert.ok(radialBeatWeight(16, 1) > .97);
+test('radial deformation is continuous with stronger motion in the core', () => {
+  assert.ok(radialBeatWeight(0, 1) > .98);
+  assert.ok(radialBeatWeight(16, 1) < .24);
   let previous = radialBeatWeight(0, 1);
 
   for (let x = .02; x <= 20; x += .02) {
     const current = radialBeatWeight(x, 1);
     assert.ok(Math.abs(current - previous) < .01);
-    assert.ok(current >= previous - .000001);
+    assert.ok(current <= previous + .000001);
     previous = current;
   }
 });

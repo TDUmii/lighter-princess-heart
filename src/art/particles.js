@@ -2,6 +2,17 @@ import { insidePoint, isInsideHeart, outlinePoint, seededRandom } from '../geome
 
 export const PARTICLE_STRIDE = 10;
 
+export function filmicPoint(x, y) {
+  const topMask = Math.max(0, Math.min(1, (-y - 2.0) / 4.5));
+  const notch = Math.exp(-Math.pow(x / 4.0, 2)) * topMask;
+  return { x, y: y - notch * 1.55 };
+}
+
+function filmicBrightness(y) {
+  const position = Math.max(0, Math.min(1, (y + 12) / 29));
+  return 0.84 + 0.34 * (position * position * (3 - 2 * position));
+}
+
 function selectInteriorPoint(random) {
   let point;
   for (let attempt = 0; attempt < 18; attempt++) {
@@ -38,6 +49,15 @@ function makeParticle(random, kind) {
     drift = .10 + random() * .25;
   }
 
+  const calibrated = filmicPoint(x, y);
+  x = calibrated.x;
+  y = calibrated.y;
+
+  if (kind === 'contour' && y > 8.0) {
+    const tail = Math.max(0, Math.min(1, (y - 8.0) / 8.0));
+    x += (random() - .5) * .66 * tail;
+  }
+
   const depth = random() * 2 - 1;
   const sparkle = random();
   const basicSize = sparkle > .995
@@ -52,7 +72,7 @@ function makeParticle(random, kind) {
     y: y * (1 + depth * .036),
     layer,
     size: basicSize * (kind === 'contour' ? 1.10 : kind === 'halo' ? .75 : 1),
-    alpha,
+    alpha: alpha * filmicBrightness(y),
     tone: random(),
     seed: random() * Math.PI * 2,
     speed: .52 + random() * .95,

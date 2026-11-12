@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createParticleCloud, PARTICLE_STRIDE } from '../src/art/particles.js';
+import { createParticleCloud, PARTICLE_STRIDE, filmicPoint } from '../src/art/particles.js';
 import { ART, qualityFor, heartUnit } from '../src/config.js';
 
 test('particle cloud is deterministic and contains independent layers', () => {
@@ -35,4 +35,23 @@ test('responsive profile respects pixel ratio limits', () => {
   assert.ok(mobile.pixelRatio <= 1.45);
   assert.ok(desktop.pixelRatio <= 1.8);
   assert.ok(heartUnit(390, 844) > 0);
+});
+
+
+test('landscape desktop uses desktop particle budget rather than mobile budget', () => {
+  const landscape = qualityFor(1200, 637, 1);
+  assert.equal(landscape.mobile, false);
+  assert.equal(landscape.count, ART.desktopParticles);
+  assert.ok(heartUnit(1200, 637) > 14);
+  const portrait = qualityFor(390, 844, 2);
+  assert.equal(portrait.mobile, true);
+});
+
+test('film-inspired lobe notch correction keeps particles finite', () => {
+  const notch = filmicPoint(0, -5);
+  const side = filmicPoint(10, -5);
+  assert.ok(notch.y < -5.2);
+  assert.ok(Math.abs(side.y + 5) < .01);
+  const end = filmicPoint(0, 17);
+  assert.equal(end.y, 17);
 });

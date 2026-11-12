@@ -8,7 +8,7 @@ Một trái tim **hồng đỏ dịu** kết từ những trái tim nhỏ chuy�
 
 - Trái tim nhỏ, mịn, mật độ dồn nhẹ gần rìa, tâm tối và thoáng; không vẽ thành một dải viền đặc.
 - Mỗi hạt trôi và nhấp nháy riêng, giữ tổng thể trái tim ổn định.
-- Nhịp đôi mạnh như trong cảnh phim: nén vào, bung ra chính, dội lại, bung phụ rồi hồi phục. Hạt di chuyển ra/vô theo trường biến dạng hướng tâm liên tục, mạnh hơn gần rìa nhưng **không tách viền giữa lõi và vỏ**.
+- Nhịp đôi theo pha nén, bung, dội, nhịp phụ và hồi phục. Hạt trong lòng tim dịch chuyển hướng tâm mạnh hơn, còn đường bao chỉ nhúc nhích nhẹ và các hạt ngoài vẫn trôi riêng. Tất cả dùng **một trường biến dạng liên tục, không tách viền lõi/vỏ**.
 - Quầng sáng đỏ hồng rõ hơn và chùm tia mềm được vẽ **phía sau toàn bộ khối trái tim**, không phụ thuộc vào các hạt phát sáng đơn lẻ.
 - Chữ viết tay **“love you”** nằm ẩn ở giữa, chỉ hiện khi phóng to từ khoảng 245%, rõ khi zoom trên 330%.
 - Zoom bằng con lăn chuột, chụm hai ngón hoặc nút +/−; kéo khi đang phóng to, chọn 100% để đặt lại.
@@ -63,3 +63,11 @@ MIT. Đây là hiệu ứng được lập trình mới, không sử dụng mã 
 - Các hạt cùng dùng trường dịch chuyển hướng tâm, tác động từ 46% ở tâm lên 100% gần mép, không chia lớp rời.
 - Hào quang phía sau tăng tối đa khoảng 13% theo nhịp chính, không có tia laser kéo ra xa.
 - Chạm màn hình sẽ tạo thêm một xung đập tắt dần. Chế độ giảm chuyển động được tôn trọng.
+
+## Phiên bản 3.2 - Căn chỉnh lại với cảnh phim
+- Sửa lỗi viewport ngang 1200x637 bị nhận nhầm là mobile, chỉ hiện 4200 hạt thay vì 14000.
+- Dựa trên ảnh phim tập 5 để cân màu hồng, độ sáng, phân bố hạt ở cạnh tim và làm mềm khe giữa hai múi.
+- Áp dụng chiều sâu giả lập GPU cho hạt, ánh sáng mềm và độ biến thiên theo trục trước/sau; giữ hạt tim nhỏ khi phóng to.
+- Chuyển trọng tâm nhịp đập vào phần trong, giữ dáng đường bao ổn định; hạt ngoài vẫn chuyển động nhẹ.
+- Kiểm thử 4 pha ở desktop và zoom 450% trên điện thoại. Đây là bản tham khảo thị giác, **chưa phải chuyển động được đo chính xác frame-by-frame từ video phim**.
+- Xem thêm [VISUAL_QA.md](./VISUAL_QA.md).
