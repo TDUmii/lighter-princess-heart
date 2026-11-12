@@ -125,8 +125,8 @@ body {
   pointer-events: none;
   user-select: none;
   white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
+  opacity: .96;
+  visibility: visible;
   will-change: transform, opacity;
   transform: translate(-50%, -50%) scale(1);
 }
@@ -141,4 +141,46 @@ body {
   text-shadow:
     0 0 5px rgba(255, 115, 130, .8),
     0 0 15px rgba(255, 50, 92, .35);
+}
+.orbit-hint {
+  position: fixed;
+  left: 50%;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  font: 400 11px/1.4 system-ui, sans-serif;
+  letter-spacing: .02em;
+  color: rgba(255, 202, 226, .73);
+  text-align: center;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+  z-index: 2;
+}
+#heart {
+  cursor: grab;
+  touch-action: none;
+}
+#heart:active {
+  cursor: grabbing;
+}
+.secret-message span {
+  color: #ffd6e3;
+  font-size: clamp(26px, 3.1vw, 34px);
+  text-shadow:
+    0 0 5px rgba(255, 125, 164, .80),
+    0 0 16px rgba(210, 53, 104, .36),
+    0 0 25px rgba(255, 77, 129, .14);
+}
+@media (max-width: 640px) {
+  .orbit-hint {
+    left: 14px;
+    bottom: max(19px, env(safe-area-inset-bottom));
+    transform: none;
+    max-width: 48%;
+    text-align: left;
+    white-space: normal;
+  }
+  .secret-message span {
+    font-size: 29px;
+  }
 }

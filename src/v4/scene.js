@@ -2,14 +2,14 @@ import { HEART, heartUnit, qualityFor } from './config.js';
 import { heartbeat } from './heartbeat.js';
 import { VolumeRenderer } from './renderer.js';
 import { CanvasRenderer } from './fallback.js';
-
-const clamp = (v,a,b) => Math.min(b,Math.max(a,v));
+import { ORBIT, clamp } from './camera.js';
 
 export class HeartScene {
   constructor(canvas, zoomLabel) {
     this.canvas = canvas;
     this.label = zoomLabel;
     this.secret = document.querySelector('#secret-message');
+    if (this.secret) this.secret.setAttribute('aria-hidden', 'false');
     this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     this.width = 1;
     this.height = 1;
@@ -18,6 +18,12 @@ export class HeartScene {
     this.targetZoom = 1;
     this.panX = 0;
     this.panY = 0;
+    this.yaw = ORBIT.initialYaw;
+    this.pitch = ORBIT.initialPitch;
+    this.yawVelocity = 0;
+    this.pitchVelocity = 0;
+    this.autoRotate = true;
+    this.lastInteraction = performance.now();
     this.quality = null;
     this.startedAt = performance.now();
     this.lastFrame = this.startedAt;
@@ -54,27 +60,43 @@ export class HeartScene {
       const delta=clamp(event.deltaY,-200,200);
       this.setZoom(this.targetZoom*Math.exp(-delta*.00145));
     },{passive:false});
-    this.canvas.addEventListener('dblclick',()=>this.resetZoom());
+    this.canvas.addEventListener('dblclick',()=>this.resetView());
 
     this.canvas.addEventListener('pointerdown',event=>{
-      this.pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
-      this.touchStart=performance.now();
+      const now = performance.now();
+      this.pointers.set(event.pointerId,{x:event.clientX,y:event.clientY,time:now});
+      this.touchStart=now;
+      this.lastInteraction=now;
+      this.yawVelocity=0;
+      this.pitchVelocity=0;
       try{this.canvas.setPointerCapture(event.pointerId);}catch{}
       this.updatePinch();
     });
     this.canvas.addEventListener('pointermove',event=>{
       const prev=this.pointers.get(event.pointerId);
       if(!prev)return;
-      this.pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
+      const now = performance.now();
+      this.pointers.set(event.pointerId,{x:event.clientX,y:event.clientY,time:now});
+      this.lastInteraction=now;
       if(this.pointers.size===2&&this.pinch){
         const [a,b]=this.pointers.values();
         this.setZoom(this.pinch.zoom*Math.hypot(a.x-b.x,a.y-b.y)/this.pinch.distance);
-      }else if(this.pointers.size===1&&this.targetZoom>1.04){
-        const maxX=unitLimit(this.unit,this.targetZoom,19);
-        const maxY=unitLimit(this.unit,this.targetZoom,20);
-        this.panX=clamp(this.panX+event.clientX-prev.x,-maxX,maxX);
-        this.panY=clamp(this.panY+event.clientY-prev.y,-maxY,maxY);
-        if(this.reducedMotion.matches)this.draw(performance.now());
+      }else if(this.pointers.size===1){
+        const dx=event.clientX-prev.x;
+        const dy=event.clientY-prev.y;
+        if(event.shiftKey && this.targetZoom>1.04){
+          const maxX=unitLimit(this.unit,this.targetZoom,19);
+          const maxY=unitLimit(this.unit,this.targetZoom,20);
+          this.panX=clamp(this.panX+dx,-maxX,maxX);
+          this.panY=clamp(this.panY+dy,-maxY,maxY);
+        }else{
+          this.yaw += dx*ORBIT.dragSensitivity;
+          this.pitch=clamp(this.pitch+dy*ORBIT.dragSensitivity*.82,ORBIT.minPitch,ORBIT.maxPitch);
+          const elapsed=Math.max(.008,(now-prev.time)/1000);
+          this.yawVelocity=clamp(dx*ORBIT.dragSensitivity/elapsed,-3,3);
+          this.pitchVelocity=clamp(dy*ORBIT.dragSensitivity*.82/elapsed,-2,2);
+        }
+        if(this.reducedMotion.matches)this.draw(now);
       }
     });
     for(const type of ['pointerup','pointercancel']){
@@ -140,6 +162,19 @@ export class HeartScene {
     }
   }
 
+  resetView(){
+    this.yaw=0;
+    this.pitch=0;
+    this.yawVelocity=0;
+    this.pitchVelocity=0;
+    this.lastInteraction=performance.now();
+    if(this.reducedMotion.matches)this.draw(performance.now());
+  }
+  setAutoRotate(enabled){
+    this.autoRotate=Boolean(enabled);
+    this.lastInteraction=performance.now();
+  }
+
   zoomIn(){this.setZoom(this.targetZoom*1.24);}
   zoomOut(){this.setZoom(this.targetZoom/1.24);}
   resetZoom(){
@@ -165,6 +200,18 @@ export class HeartScene {
     this.zoom+=(this.targetZoom-this.zoom)*(1-Math.exp(-delta/110));
     if(Math.abs(this.zoom-this.targetZoom)<.001)this.zoom=this.targetZoom;
 
+    if(!this.pointers.size){
+      const dt=delta/1000;
+      this.yaw+=this.yawVelocity*dt;
+      this.pitch=clamp(this.pitch+this.pitchVelocity*dt,ORBIT.minPitch,ORBIT.maxPitch);
+      this.yawVelocity*=Math.exp(-4.1*dt);
+      this.pitchVelocity*=Math.exp(-4.1*dt);
+      if(this.autoRotate && now-this.lastInteraction>1800){
+        this.yaw+=ORBIT.autoSpeed*dt;
+      }
+      if(Math.abs(this.yaw)>100)this.yaw%=Math.PI*2;
+    }
+
     this.draw(now);
     this.frameCounter++;
     if(this.engine==='WebGL2'&&!this.adjusted){
@@ -188,19 +235,15 @@ export class HeartScene {
     const beat=reduced?0:heartbeat(time);
     this.renderer.render({
       time,beat,zoom:this.zoom,unit:this.unit,
-      panX:this.panX,panY:this.panY
+      panX:this.panX,panY:this.panY,
+      yaw:this.yaw,pitch:this.pitch
     });
     if(!this.secret)return;
-    const amount=clamp((this.zoom-HEART.secretZoom)/.78,0,1);
-    if(amount<.001){
-      this.secret.style.visibility='hidden';
-    }else{
-      this.secret.style.visibility='visible';
-      this.secret.style.opacity=(amount*.90).toFixed(3);
-      this.secret.style.left=(this.width*.5+this.panX)+'px';
-      this.secret.style.top=(this.height*.5-this.unit*1.7+this.panY)+'px';
-      this.secret.style.transform='translate(-50%, -50%) scale('+(.7*this.zoom).toFixed(3)+')';
-    }
+    this.secret.style.visibility='visible';
+    this.secret.style.opacity='.96';
+    this.secret.style.left=(this.width*.5+this.panX)+'px';
+    this.secret.style.top=(this.height*.5-this.unit*1.7+this.panY)+'px';
+    this.secret.style.transform='translate(-50%, -50%) scale('+clamp(this.zoom*.86,1,2.25).toFixed(3)+')';
   }
 }
 

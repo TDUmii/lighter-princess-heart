@@ -64,3 +64,12 @@ Phiên bản 3.3 được bảo lưu trong lịch sử Git tại tag `v3.3-befor
 ## Giấy phép
 
 MIT.
+
+## Phiên bản 4.1: góc nhìn 3D
+
+- Kéo chuột hoặc vuốt một ngón để xoay khối tim quanh 360° theo chiều ngang, nghiêng lên/xuống.
+- Có chế độ xoay tự động nhẹ, nút tạm dừng/tiếp tục và nút trả về mặt trước.
+- Chữ **love you** luôn nhìn thấy khi xoay, không cần zoom sâu.
+- Đáy tim được bo và rút ngắn; giữ lõi 3D, vỏ hạt mềm và hạt bắn ra ở đỉnh nhịp.
+- Chế độ Canvas2D dự phòng cũng hỗ trợ quay góc nhìn.
+- [Báo cáo kiểm thử 4.1](./V4_1_QA.md).

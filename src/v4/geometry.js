@@ -15,10 +15,13 @@ export function seededRandom(seed = 2026) {
 
 export function heartPoint(t) {
   const s = Math.sin(t);
+  const rawY = -(13 * Math.cos(t) - 5 * Math.cos(2 * t)
+    - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+  const lower = Math.max(0, Math.min(1, (rawY - 7) / 10));
+  const softened = lower * lower * (3 - 2 * lower);
   return {
-    x: 16 * s * s * s,
-    y: -(13 * Math.cos(t) - 5 * Math.cos(2 * t)
-      - 2 * Math.cos(3 * t) - Math.cos(4 * t))
+    x: 16 * s * s * s + 3.4 * s * softened,
+    y: rawY <= 5 ? rawY : 5 + (rawY - 5) * .86
   };
 }
 

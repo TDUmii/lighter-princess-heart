@@ -1,6 +1,7 @@
 import { HEART } from './config.js';
 import { createParticleSystems, STRIDE } from './particles.js';
 import { beatPhase, burstStrength, deformScale } from './heartbeat.js';
+import { rotatePoint, perspectiveScale } from './camera.js';
 
 function makeSprite() {
   const sprite = document.createElement('canvas');
@@ -51,7 +52,7 @@ export class CanvasRenderer {
     this.layers = system.layers;
   }
 
-  render({ time, beat, zoom, unit, panX, panY }) {
+  render({ time, beat, zoom, unit, panX, panY, yaw = 0, pitch = 0 }) {
     if (!this.data) return;
     const ctx = this.ctx;
     const originX = this.width * .5 + panX;
@@ -102,10 +103,11 @@ export class CanvasRenderer {
         y+=ny*HEART.burstTravel*flight;
       }
 
-      const depthScale=1+z*.032;
-      const px=x*unit*depthScale;
-      const py=y*unit*depthScale;
-      const light=Math.min(1,Math.max(0,z/14+.54));
+      const rotated=rotatePoint(x,y,z,yaw,pitch);
+      const depthScale=perspectiveScale(rotated.z);
+      const px=rotated.x*unit*.87*depthScale;
+      const py=rotated.y*unit*.92*depthScale;
+      const light=Math.min(1,Math.max(0,rotated.z/24+.54));
       const red=Math.round(226+29*tone);
       const green=Math.round(35+102*(.42*tone+.58*light));
       const blue=Math.round(74+95*(.42*tone+.58*light));

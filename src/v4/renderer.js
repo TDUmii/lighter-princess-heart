@@ -52,7 +52,7 @@ export class VolumeRenderer {
     ]);
     this.pointU = uniforms(gl, this.points, [
       'uResolution', 'uCenter', 'uUnit', 'uZoom', 'uRatio',
-      'uTime', 'uPeriod', 'uBeat', 'uBurstTravel', 'uPass'
+      'uTime', 'uPeriod', 'uBeat', 'uBurstTravel', 'uYaw', 'uPitch', 'uPass'
     ]);
 
     this.vao = gl.createVertexArray();
@@ -104,7 +104,7 @@ export class VolumeRenderer {
     }
   }
 
-  render({ time, beat, zoom, unit, panX, panY }) {
+  render({ time, beat, zoom, unit, panX, panY, yaw = 0, pitch = 0 }) {
     if (!this.layers || this.lost) return;
     const gl = this.gl;
     const ratio = this.ratio;
@@ -137,6 +137,8 @@ export class VolumeRenderer {
     gl.uniform1f(this.pointU.uPeriod,HEART.period);
     gl.uniform1f(this.pointU.uBeat,beat);
     gl.uniform1f(this.pointU.uBurstTravel,HEART.burstTravel);
+    gl.uniform1f(this.pointU.uYaw,yaw);
+    gl.uniform1f(this.pointU.uPitch,pitch);
 
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA,gl.ONE);
