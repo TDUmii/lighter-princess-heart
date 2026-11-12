@@ -1,80 +1,66 @@
 # Trái tim
 
-Một trái tim **hồng đỏ dịu** kết từ những trái tim nhỏ chuyển động nhẹ trên nền trời đêm, lấy cảm hứng từ cảnh lập trình trong phim *Chiếc Bật Lửa và Váy Công Chúa*.
+Dựng một trái tim hạt 3D mềm mại lấy cảm hứng từ cảnh Lý Tuân trong phim *Chiếc Bật Lửa và Váy Công Chúa*.
 
-**Website công khai:** https://tdumii.github.io/lighter-princess-heart/
+**Website:** https://tdumii.github.io/lighter-princess-heart/
 
-## Thiết kế
+## Phiên bản 4.0
 
-- Trái tim nhỏ, mịn, mật độ dồn nhẹ gần rìa, tâm tối và thoáng; không vẽ thành một dải viền đặc.
-- Mỗi hạt trôi và nhấp nháy riêng, giữ tổng thể trái tim ổn định.
-- Nhịp liền mạch khoảng 0,90 giây, đối chiếu từ video phim. Hạt bên trong co/bung đồng thời có sóng lan ra và dòng chuyển động xoáy nhẹ; viền vẫn chuyển động mềm, không tạo vạch ngăn giữa lõi và vỏ.
-- Quầng sáng đỏ hồng rõ hơn và chùm tia mềm được vẽ **phía sau toàn bộ khối trái tim**, không phụ thuộc vào các hạt phát sáng đơn lẻ.
-- Chữ viết tay **“love you”** nằm ẩn ở giữa, chỉ hiện khi phóng to từ khoảng 245%, rõ khi zoom trên 330%.
-- Zoom bằng con lăn chuột, chụm hai ngón hoặc nút +/−; kéo khi đang phóng to, chọn 100% để đặt lại.
-- WebGL2 giúp GPU tính chuyển động; có Canvas 2D dự phòng và tự động hạ độ phân giải khi cần.
+Dựng lại toàn bộ hệ hiệu ứng thay vì sửa tiếp thuật toán cũ. Đám hạt được tổ chức thành ba lớp độc lập:
 
-## Chạy trên máy
+- **Lõi 3D:** hàng nghìn hạt có tọa độ trước/sau và độ sáng theo chiều sâu; co tròn vào tâm rồi nở ra.
+- **Lớp vỏ:** hạt phân bố mềm quanh đường bao, thay đổi độ sáng và co bóp nhẹ theo cùng nhịp, không tạo viền cứng.
+- **Hạt bung:** một đợt ngắn bật ra khỏi viền khi tim nở đến gần đỉnh, rồi mờ và biến mất.
+
+Nhịp 0,90 giây được chọn sau khi lấy mẫu các khung hình từ clip phim tham khảo. Ánh sáng hồng nhẹ tỏa từ nền phía sau toàn bộ tim. Khi phóng to, các hạt hiện hình trái tim nhỏ và câu **love you** viết tay xuất hiện ở vùng trung tâm.
+
+Tương thích điện thoại và desktop. Dùng WebGL2 tăng tốc GPU và Canvas2D dự phòng khi thiết bị không hỗ trợ. Có chế độ giảm chuyển động và tự giảm độ phân giải khi tốc độ khung hình thấp.
+
+## Chạy dự án
+
+Không cần thư viện ngoài hoặc quá trình build:
 
 ```bash
 python -m http.server 8000
 ```
 
-Mở http://localhost:8000. Không cần npm install hoặc tải thư viện bên ngoài.
+Mở http://localhost:8000.
 
 ## Cấu trúc
 
-| Tệp | Vai trò |
-| --- | --- |
-| `src/main.js` | Khởi tạo và điều khiển zoom |
-| `src/scene.js` | Thời gian, chuyển động và hiệu năng |
-| `src/config.js` | Nhịp tim, màu sắc, mật độ, ánh sáng |
-| `src/geometry.js` | Hình học trái tim |
-| `src/art/particles.js` | Tạo và phân bố hạt |
-| `src/art/deformation.js` | Trường biến dạng hướng tâm và dòng hạt lan truyền |
-| `src/art/heartbeat.js` | Chu kỳ nhịp theo số liệu clip tham khảo |
-| `src/gpu/shaders.js` | Shader hạt, quầng sáng phía sau và tia sáng |
-| `src/gpu/renderer.js` | Vẽ bằng WebGL2 |
-| `src/fallback.js` | Canvas 2D khi không dùng được GPU |
-| `tests/` | Kiểm thử tự động |
-
-## Kiểm thử
-
-```bash
-npm test
-npm run check
+```text
+src/
+  main.js
+  v4/
+    config.js
+    geometry.js
+    heartbeat.js
+    particles.js
+    layers/
+      core.js
+      shell.js
+      burst.js
+    shaders.js
+    renderer.js
+    fallback.js
+    scene.js
+tests/
+  v4.test.js
 ```
 
-Có thêm [kế hoạch tái dựng](./REBUILD_PLAN.md) và [ghi chú QA](./QA_NOTES.md).
+`npm test` chạy kiểm thử hình học, trường 3D, luồng hạt và nhịp. `npm run check` kiểm tra cú pháp.
+
+## Nguồn tham khảo và QA
+
+- [Kế hoạch dựng mới](./V4_BUILD_PLAN.md).
+- [Kiểm thử kỹ thuật và đối chiếu hình](./V4_QA.md).
+- [Video trái tim trong phim](https://www.bilibili.com/video/BV1Bg411B7md/), đặc biệt đoạn 69–72,2 giây.
+- [Bài giải thích tái tạo hiệu ứng](https://www.cnblogs.com/crossin/p/16912110.html).
+
+Đây là chương trình mới lấy cảnh phim làm chuẩn tham khảo, **không phải mã nguồn/hiệu ứng gốc được trích xuất**, và chưa thể khẳng định giống tuyệt đối từng khung hình.
+
+Phiên bản 3.3 được bảo lưu trong lịch sử Git tại tag `v3.3-before-rebuild`.
 
 ## Giấy phép
 
-MIT. Đây là hiệu ứng được lập trình mới, không sử dụng mã nguồn, video hay âm thanh trích xuất từ phim.
-
-## Phiên bản 3: đối chiếu cảnh phim
-- Ảnh đối chiếu trực tiếp: https://www.beauty321.com/post/51841 (ảnh chụp cảnh trái tim lập trình tập 5).
-- Tỷ lệ vùng trái tim nổi bật ở khung 1200x637: phim 34,4% ngang / 63,0% cao; bản dựng 34,4% ngang / 63,4% cao.
-- 14.000 hạt trên desktop, 4.200 hạt trên thiết bị di động; các tim nhỏ chỉ rõ hình khi phóng to.
-- Giảm ánh sáng quầng, bỏ các tia laser dài và để trung tâm tim thoáng.
-- Giữ chức năng zoom 450%, kéo để xem, cùng lời nhắn love you ẩn khi chưa phóng to.
-
-## Phiên bản 3.1 - Nhịp đập có độ bật
-- Chu kỳ khoảng 1,06 giây, nén vào -2,25%, bung chính +7,5%, dội ngược, bung phụ +3,9% rồi hồi phục.
-- Các hạt cùng dùng trường dịch chuyển hướng tâm, tác động từ 46% ở tâm lên 100% gần mép, không chia lớp rời.
-- Hào quang phía sau tăng tối đa khoảng 13% theo nhịp chính, không có tia laser kéo ra xa.
-- Chạm màn hình sẽ tạo thêm một xung đập tắt dần. Chế độ giảm chuyển động được tôn trọng.
-
-## Phiên bản 3.2 - Căn chỉnh lại với cảnh phim
-- Sửa lỗi viewport ngang 1200x637 bị nhận nhầm là mobile, chỉ hiện 4200 hạt thay vì 14000.
-- Dựa trên ảnh phim tập 5 để cân màu hồng, độ sáng, phân bố hạt ở cạnh tim và làm mềm khe giữa hai múi.
-- Áp dụng chiều sâu giả lập GPU cho hạt, ánh sáng mềm và độ biến thiên theo trục trước/sau; giữ hạt tim nhỏ khi phóng to.
-- Chuyển trọng tâm nhịp đập vào phần trong, giữ dáng đường bao ổn định; hạt ngoài vẫn chuyển động nhẹ.
-- Kiểm thử 4 pha ở desktop và zoom 450% trên điện thoại. Đây là bản tham khảo thị giác, **chưa phải chuyển động được đo chính xác frame-by-frame từ video phim**.
-- Xem thêm [VISUAL_QA.md](./VISUAL_QA.md).
-
-## Phiên bản 3.3 - Hiệu chỉnh từng frame
-- Xem trực tiếp clip tham khảo: https://www.bilibili.com/video/BV1Bg411B7md/ (đoạn trái tim 69–72,2 giây).
-- Đối chiếu 33 frame cách nhau 0,1 giây; chu kỳ chiều rộng xấp xỉ 0,895 giây, làm tròn thành 0,90 giây trong code.
-- Thay nhịp double-beat cũ bằng nhịp chính liên tục, thêm sóng hạt hướng tâm và dòng xoáy nhẹ chạy từ trong ra ngoài.
-- Giữ hình dáng, bảng màu, mật độ và các tính năng của bản 3.2; chỉ thay đổi thuật toán chuyển động và độ sáng chuyển động.
-- Phương pháp, dữ liệu và giới hạn được trình bày tại [FILM_MOTION_QA.md](./FILM_MOTION_QA.md).
+MIT.

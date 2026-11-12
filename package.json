@@ -1,10 +1,10 @@
 {
   "name": "trai-tim",
   "private": true,
-  "version": "3.3.0",
+  "version": "4.0.0",
   "type": "module",
   "scripts": {
-    "test": "node --test",
-    "check": "node --check src/main.js && node --check src/scene.js && node --check src/gpu/renderer.js && node --check src/gpu/shaders.js"
+    "test": "node --test tests/v4.test.js",
+    "check": "node --check src/main.js && node --check src/v4/scene.js && node --check src/v4/renderer.js && node --check src/v4/shaders.js && node --check src/v4/fallback.js && node --check src/v4/particles.js && node --check src/v4/geometry.js"
   }
 }
