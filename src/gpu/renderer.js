@@ -53,7 +53,7 @@ export class ParticleRenderer {
     this.particles = link(gl, particleVertex, particleFragment);
 
     this.skyUniforms = findUniforms(gl, this.background, [
-      'uResolution', 'uCenter', 'uUnit', 'uTime', 'uRays'
+      'uResolution', 'uCenter', 'uUnit', 'uTime', 'uRays', 'uBeat'
     ]);
     this.particleUniforms = findUniforms(gl, this.particles, [
       'uResolution', 'uCenter', 'uUnit', 'uTime',
@@ -131,6 +131,7 @@ export class ParticleRenderer {
     gl.uniform1f(this.skyUniforms.uUnit, unit * ratio * zoom);
     gl.uniform1f(this.skyUniforms.uTime, seconds);
     gl.uniform1f(this.skyUniforms.uRays, rays);
+    gl.uniform1f(this.skyUniforms.uBeat, beat);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
     gl.useProgram(this.particles);

@@ -1,7 +1,15 @@
-export function softBreathWeight(x, y) {
-  const radial = Math.hypot(x / 17.6, (y - 1.2) / 18.4);
-  const t = Math.max(0, Math.min(1, (radial - 0.16) / 0.78));
-  const smooth = t * t * (3 - 2 * t);
-  const weight = 1 - smooth;
-  return weight * weight * (3 - 2 * weight);
+export function radialBeatWeight(x, y) {
+  const radius = Math.hypot(x / 16.0, (y - 1.0) / 16.0);
+  const normalized = Math.max(0, Math.min(1, (radius - 0.08) / 0.95));
+  const eased = normalized * normalized * (3 - 2 * normalized);
+  return 0.46 + 0.54 * eased;
+}
+
+export function deformPoint(x, y, beat) {
+  const weight = radialBeatWeight(x, y);
+  const relativeY = y - 1.0;
+  return {
+    x: x * (1 + beat * weight),
+    y: 1.0 + relativeY * (1 + beat * weight)
+  };
 }

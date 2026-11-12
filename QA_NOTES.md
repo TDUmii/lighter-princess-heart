@@ -41,3 +41,9 @@ Chỉ đánh dấu hoàn tất khi GitHub Pages báo build thành công, trang v
 - Đã kiểm thử trên viewport 390x844: WebGL2=true, glError=0, zoom 450% cho love you xuất hiện, console 0 errors.
 - QA_TEMP chỉ lưu ảnh kiểm thử local, không đẩy ảnh chụp phim vào GitHub.
 - CLI Antigravity thử trong chế độ kiểm tra độc lập nhưng bị read_file permission/timeout, chưa tạo được báo cáo. Đã hoàn nguyên settings.
+
+## Phiên bản 3.1 - QA nhịp đôi
+- Đã lưu 5 khung hình QA local: inward, main, recoil, second, rest; mỗi frame được render ở phase xác định, tránh lệch do chụp video ngẫu nhiên.
+- Khung 1200x637: bright bbox width nén=395px, bung chính=434px, dội=396px, bung phụ=420px, nghỉ=405px. Độ nở từ nén tới bung chính ~9,9%.
+- Các frame WebGL2 đều render đúng và không ghi nhận lỗi. Đã sửa guard Infinity/NaN cho xung chạm đầu tiên.
+- Test thuật toán xác minh negative/positive envelope, tính tuần hoàn, độ liên tục, không còn đường biên riêng giữa lõi/vỏ.

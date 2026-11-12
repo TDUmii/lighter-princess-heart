@@ -1,5 +1,5 @@
 import { createParticleCloud, PARTICLE_STRIDE } from './art/particles.js';
-import { softBreathWeight } from './art/deformation.js';
+import { deformPoint } from './art/deformation.js';
 
 export class CanvasFallback {
   constructor(canvas) {
@@ -100,9 +100,9 @@ export class CanvasFallback {
       let x = points[i] * (1 + depth * .045) + motionX;
       let y = points[i + 1] * (1 + depth * .045) + motionY;
 
-      const amount = 1 + beat * softBreathWeight(points[i], points[i + 1]);
-      x *= amount;
-      y *= amount;
+      const position = deformPoint(x, y, beat);
+      x = position.x;
+      y = position.y;
 
       const flicker = .86 + .14 * Math.sin(seconds * (1.45 + speed) + seed * 2.4);
       const red = Math.round(200 + 55 * tone);

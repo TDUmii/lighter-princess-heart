@@ -1,9 +1,9 @@
 export const ART = Object.freeze({
   title: 'Trái tim',
   mobileBreakpoint: 640,
-  pulsePeriod: 1.72,
-  pulseStrength: 0.025,
-  touchPulse: 0.021,
+  pulsePeriod: 1.06,
+  pulseStrength: 0.075,
+  touchPulse: 0.032,
   zoomMin: 0.65,
   zoomMax: 4.5,
   desktopParticles: 14000,

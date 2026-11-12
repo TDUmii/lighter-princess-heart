@@ -1,37 +1,40 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { softBreathWeight } from '../src/art/deformation.js';
+import { deformPoint, radialBeatWeight } from '../src/art/deformation.js';
 import { ART } from '../src/config.js';
-import { particleVertex, skyFragment } from '../src/gpu/shaders.js';
+import { particleVertex, skyFragment, particleFragment } from '../src/gpu/shaders.js';
 
-test('breathing field fades smoothly from the center with no fixed-layer seam', () => {
-  assert.ok(softBreathWeight(0, 0) > .94);
-  assert.ok(softBreathWeight(16, 0) < .08);
-  assert.ok(softBreathWeight(20, 0) < .00001);
+test('radial deformation is continuous with stronger motion near the edge', () => {
+  assert.ok(radialBeatWeight(0, 1) >= .45);
+  assert.ok(radialBeatWeight(16, 1) > .97);
+  let previous = radialBeatWeight(0, 1);
 
-  const points = [];
-  for (let x = 0; x <= 20; x += .02) points.push(softBreathWeight(x, 0));
-  for (let i = 1; i < points.length; i++) {
-    assert.ok(Math.abs(points[i] - points[i - 1]) < .01);
-    assert.ok(points[i] <= points[i - 1] + .00001);
+  for (let x = .02; x <= 20; x += .02) {
+    const current = radialBeatWeight(x, 1);
+    assert.ok(Math.abs(current - previous) < .01);
+    assert.ok(current >= previous - .000001);
+    previous = current;
   }
+});
 
-  assert.match(particleVertex, /float breath = softBreathWeight\(aPosition\)/);
+test('particles move both inward and outward; shell has no separate scaling rule', () => {
+  const x = 12, y = 3;
+  const rest = Math.hypot(x, y - 1);
+  const inward = deformPoint(x, y, -.025);
+  const outward = deformPoint(x, y, .075);
+
+  assert.ok(Math.hypot(inward.x, inward.y - 1) < rest);
+  assert.ok(Math.hypot(outward.x, outward.y - 1) > rest);
+  assert.match(particleVertex, /float weight = radialBeatWeight\(aPosition\)/);
   assert.doesNotMatch(particleVertex, /if\s*\(layer\s*>\s*0\.5/);
 });
 
-test('ruby-red palette and rear halo are configured', () => {
-  assert.ok(ART.baseColor[0] > ART.baseColor[1] * 5);
-  assert.ok(ART.baseColor[0] > ART.baseColor[2] * 4);
-  assert.ok(ART.pulseStrength < .05);
+test('background glow responds gently to pulse, with mini heart sprites', () => {
+  assert.ok(ART.pulsePeriod > .9 && ART.pulsePeriod < 1.2);
+  assert.ok(ART.pulseStrength > .06 && ART.pulseStrength < .09);
   assert.ok(ART.rays > 0 && ART.rays < .4);
-  assert.match(skyFragment, /float aura = max\(lobes, point\)/);
-});
-
-test('GPU renders miniature heart shapes instead of circular inner dots', async () => {
-  const { particleFragment, particleVertex } = await import('../src/gpu/shaders.js');
+  assert.match(skyFragment, /uniform float uBeat/);
+  assert.match(skyFragment, /float pulseGlow/);
   assert.match(particleFragment, /float miniHeart\(vec2 uv\)/);
   assert.match(particleFragment, /float heartShape = miniHeart\(gl_PointCoord\)/);
-  assert.match(particleFragment, /vLayer > 1\.5 \? ambientSpark : heartShape/);
-  assert.match(particleVertex, /vLayer = layer/);
 });

@@ -63,3 +63,8 @@ Không chép khung hình phim, âm thanh hay mã nguồn của bên thứ ba và
 - Phát sáng từ nền xanh đen rất tối, không tạo ray dài; rim có độ sáng cao hơn interior nhưng không đập thành hai lớp.
 - Tim bé chuẩn phương hướng (nhọn xuống), chỉ nhận ra khi zoom sâu; lời nhắn ẩn ở 100% và xuất hiện tại 450%.
 - Antigravity 1.5.1 đã được thử headless read-only, chưa có báo cáo vì lần đầu từ chối read_file và lần hai timeout. Settings quyền được khôi phục.
+
+## v3.1 - Motion / frame choreography
+- Các keyframe normalize trong `src/art/heartbeat.js` tạo chuỗi nén -> bung chính -> dội -> bung phụ -> hồi phục trong ~1,06s.
+- GPU `src/gpu/shaders.js` và Canvas fallback `src/art/deformation.js` dùng radial weight liên tục từ 0,46 (tâm) tới 1 (rìa) để bảo toàn silhouette, tránh đường phân lớp.
+- Ánh sáng nền tăng nhẹ theo positive beat nhưng không tăng mật độ hay kích thước tim bé.
