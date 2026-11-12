@@ -1,16 +1,16 @@
 export const ART = Object.freeze({
   title: 'Trái tim',
   mobileBreakpoint: 640,
-  pulsePeriod: 1.62,
-  pulseStrength: 0.084,
-  touchPulse: 0.072,
+  pulsePeriod: 1.72,
+  pulseStrength: 0.034,
+  touchPulse: 0.026,
   zoomMin: 0.65,
   zoomMax: 3.3,
-  desktopParticles: 41000,
-  mobileParticles: 19500,
-  baseColor: [1, 0.34, 0.63],
-  glows: 0.85,
-  rays: 0.75
+  desktopParticles: 26000,
+  mobileParticles: 11000,
+  baseColor: [0.95, 0.10, 0.14],
+  glows: 0.35,
+  rays: 0.34
 });
 
 export function qualityFor(width, height, deviceRatio = 1) {

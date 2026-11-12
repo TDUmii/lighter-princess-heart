@@ -23,3 +23,8 @@
 ## Kiểm chứng bản công khai
 
 Chỉ đánh dấu hoàn tất khi GitHub Pages báo build thành công, trang và các module WebGL trả HTTP 200, sau đó mở trực tiếp bằng trình duyệt trên URL công khai.
+
+## Cập nhật v2.1
+- Kiểm tra ngưỡng nhịp qua kiểm thử trường biến dạng liên tục, bảo đảm không nhảy giữa core/shell.
+- Đo viewport giả lập điện thoại 390 × 844, WebGL2 hoạt động và zoom 100% > 124% > 100%.
+- Mục tiêu nhịp tự nhiên hơn, ánh sáng đỏ từ nền phía sau và giảm mật độ viền.

@@ -11,28 +11,30 @@ function makeParticle(random, kind) {
   if (kind === 'halo' || kind === 'contour') {
     const p = outlinePoint(random);
     const offset = kind === 'halo'
-      ? 1.005 + Math.pow(random(), 1.9) * 0.27
-      : 0.91 + random() * 0.15;
-    x = p.x * offset + (random() - .5) * (kind === 'halo' ? 1.2 : 0.25);
-    y = p.y * offset + (random() - .5) * (kind === 'halo' ? 1.2 : 0.25);
+      ? 1.008 + Math.pow(random(), 2) * 0.15
+      : 0.960 + random() * 0.064;
+    const spread = kind === 'halo' ? 0.72 : 0.22;
+    x = p.x * offset + (random() - .5) * spread;
+    y = p.y * offset + (random() - .5) * spread;
     layer = kind === 'halo' ? 2 : 0;
-    drift = kind === 'halo' ? .3 + random() * .55 : .10 + random() * .2;
+    drift = kind === 'halo' ? .20 + random() * .28 : .10 + random() * .19;
   } else {
     const p = insidePoint(random);
     x = p.x;
     y = p.y;
     layer = isInsideHeart(x / .81, y / .81) ? 1 : 0;
-    drift = layer === 1 ? .10 + random() * .16 : .13 + random() * .29;
+    drift = .10 + random() * .23;
   }
 
   const depth = random() * 2 - 1;
   const sparkle = random();
-  const size = (sparkle > .988
-    ? 1.6 + random() * 1.15
-    : .45 + Math.pow(random(), 1.65) * 1.05);
-  const alpha = layer === 2
-    ? .22 + random() * .40
-    : .68 + random() * .38;
+  const size = sparkle > .995
+    ? 1.40 + random() * 0.64
+    : .44 + Math.pow(random(), 1.65) * .92;
+  const alpha = kind === 'halo' ? .09 + random() * .16
+    : kind === 'contour' ? .33 + random() * .24
+    : .49 + random() * .30;
+
   return {
     x: x * (1 + depth * .036),
     y: y * (1 + depth * .036),
@@ -56,10 +58,9 @@ export function createParticleCloud(count, seed = 20221104) {
 
   for (let i = 0; i < count; i++) {
     const r = random();
-    const kind = r < .105 ? 'halo'
-      : r < .265 ? 'contour'
-      : 'fill';
+    const kind = r < .04 ? 'halo' : r < .10 ? 'contour' : 'fill';
     const p = makeParticle(random, kind);
+
     if (p.layer === 1) core++;
     else if (p.layer === 2) halo++;
     else shell++;
@@ -77,9 +78,5 @@ export function createParticleCloud(count, seed = 20221104) {
     data[index + 9] = p.depth;
   }
 
-  return {
-    data,
-    count,
-    counts: { core, shell, halo }
-  };
+  return { data, count, counts: { core, shell, halo } };
 }

@@ -13,10 +13,10 @@ Không chép khung hình phim, âm thanh hay mã nguồn của bên thứ ba và
 
 ## 2. Tiêu chí thị giác
 
-- Trái tim có hai múi mềm và mũi nhọn; hạt hồng nhỏ, dày, không tạo cột sáng dọc trục giữa.
+- Trái tim có hai múi mềm và mũi nhọn; hạt đỏ ruby nhỏ, thưa hơn, không tạo cột sáng dọc trục giữa.
 - Đường viền tổng thể ổn định; hạt phía ngoài bay nhẹ, lấp lánh và thay đổi độ sáng.
-- Vùng lõi phía trong đập hai nhịp không làm phồng toàn bộ trái tim.
-- Ánh sáng lan ra từ tim: hào quang và tia sáng dạng sương mờ giữa nền trời đêm, có chuyển động rất chậm.
+- Nhịp đôi biên độ nhỏ tác động thông qua trường biến dạng mượt trên tất cả hạt, giảm dần ra phía ngoài và không tạo đường ranh giữa lõi với vỏ.
+- Ánh sáng lan từ phía sau toàn bộ khối tim: hào quang đỏ và chùm tia dạng sương mờ giữa nền trời đêm, không phụ thuộc từng hạt.
 - Không có chữ trên trái tim hoặc nội dung cá nhân; tiêu đề trình duyệt là “Trái tim”.
 
 ## 3. Thiết kế kỹ thuật
@@ -44,3 +44,9 @@ Không chép khung hình phim, âm thanh hay mã nguồn của bên thứ ba và
 - GitHub repository: https://github.com/TDUmii/lighter-princess-heart
 - Website: https://tdumii.github.io/lighter-princess-heart/
 - Đẩy lên `main`, đợi Pages hoàn tất, kiểm tra HTTP 200 và tải đầy đủ file module.
+
+## Cập nhật v2.1 - Màu đỏ và nhịp liền mạch
+- Hạt: 26.000 desktop, 11.000 mobile; chỉ 4% halo và 6% contour, còn lại rải trong lòng tim.
+- Màu đỏ ruby từ shader, giảm hẳn bloom từng hạt.
+- Loại bỏ nhánh biến dạng theo layer: mọi hạt dùng một trường softBreathWeight liên tục.
+- Mờ nền từ ba vùng sau toàn bộ trái tim và những tia sáng đỏ mềm, cường độ thấp.

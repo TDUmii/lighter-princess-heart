@@ -1,4 +1,5 @@
 import { createParticleCloud, PARTICLE_STRIDE } from './art/particles.js';
+import { softBreathWeight } from './art/deformation.js';
 
 export class CanvasFallback {
   constructor(canvas) {
@@ -30,7 +31,7 @@ export class CanvasFallback {
     }
   }
 
-  render({ seconds, unit, zoom, panX, panY, beat, rays = .78 }) {
+  render({ seconds, unit, zoom, panX, panY, beat, rays = .34 }) {
     const ctx = this.context;
     const width = this.width;
     const height = this.height;
@@ -39,38 +40,42 @@ export class CanvasFallback {
 
     ctx.setTransform(this.ratio, 0, 0, this.ratio, 0, 0);
     ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, width, height);
 
     ctx.save();
     ctx.translate(centerX, centerY);
     ctx.scale(zoom, zoom);
-    const glow = ctx.createRadialGradient(0, 0, unit, 0, 0, unit * 31);
-    glow.addColorStop(0, 'rgba(240,43,132,.11)');
-    glow.addColorStop(.55, 'rgba(116,17,62,.035)');
+
+    const glow = ctx.createRadialGradient(0, -unit, unit * 3, 0, 0, unit * 30);
+    glow.addColorStop(0, 'rgba(134,10,20,.085)');
+    glow.addColorStop(.54, 'rgba(88,5,13,.028)');
     glow.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = glow;
     ctx.beginPath();
-    ctx.arc(0, 0, unit * 31, 0, Math.PI * 2);
+    ctx.arc(0, 0, unit * 30, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.globalCompositeOperation = 'lighter';
-    ctx.lineCap = 'round';
-    for (let i = 0; i < 32; i++) {
-      const angle = i * (Math.PI * 2 / 32) + .12 * Math.sin(i * 2.7 + seconds * .07);
-      const length = unit * (17 + 15 * Math.abs(Math.sin(i * 6.3)));
-      ctx.strokeStyle = 'rgba(240,72,152,' + (0.018 * rays) + ')';
-      ctx.lineWidth = unit * (0.2 + (i % 3) * .13);
+    ctx.globalCompositeOperation = 'screen';
+    for (let i = 0; i < 16; i++) {
+      const angle = i * Math.PI / 8 + Math.sin(i * 1.8) * .08;
+      const length = unit * (23 + 7 * Math.abs(Math.sin(i * 6.3)));
+      const grad = ctx.createLinearGradient(0, 0, Math.cos(angle) * length, Math.sin(angle) * length);
+      grad.addColorStop(0, 'rgba(85,6,14,0)');
+      grad.addColorStop(.45, 'rgba(95,6,16,' + (0.018 * rays) + ')');
+      grad.addColorStop(1, 'rgba(80,2,8,0)');
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = unit * 1.2;
       ctx.beginPath();
-      ctx.moveTo(Math.cos(angle) * unit * 5, Math.sin(angle) * unit * 5);
+      ctx.moveTo(Math.cos(angle) * unit * 10, Math.sin(angle) * unit * 10);
       ctx.lineTo(Math.cos(angle) * length, Math.sin(angle) * length);
       ctx.stroke();
     }
 
     const points = this.particles;
-    const t = seconds * .6;
+    const time = seconds * .55;
     for (let i = 0; i < points.length; i += PARTICLE_STRIDE) {
-      const layer = points[i + 2];
       const seed = points[i + 3];
       const speed = points[i + 4];
       const size = points[i + 5];
@@ -78,27 +83,26 @@ export class CanvasFallback {
       const tone = points[i + 7];
       const drift = points[i + 8];
       const depth = points[i + 9];
-      const motionX = Math.sin(t * speed + seed) * drift;
-      const motionY = Math.cos(t * speed * .82 + seed) * drift;
-      let x = (points[i] * (1 + depth * .045) + motionX);
-      let y = (points[i + 1] * (1 + depth * .045) + motionY);
-      if (layer === 1) {
-        const radius = Math.hypot(points[i] / 16, points[i + 1] / 16);
-        const envelope = Math.max(0, 1 - radius);
-        const sizeMultiplier = 1 + beat * (0.32 + 0.68 * envelope);
-        x *= sizeMultiplier;
-        y *= sizeMultiplier;
-      }
-      const intensity = .80 + .20 * Math.sin(seconds * (1.8 + speed) + seed * 2.7);
-      const red = 255;
-      const green = Math.round(70 + 70 * tone);
-      const blue = Math.round(132 + 67 * tone);
-      ctx.globalAlpha = alpha * intensity;
+
+      const motionX = Math.sin(time * speed + seed) * drift;
+      const motionY = Math.cos(time * speed * .82 + seed) * drift;
+      let x = points[i] * (1 + depth * .045) + motionX;
+      let y = points[i + 1] * (1 + depth * .045) + motionY;
+
+      const amount = 1 + beat * softBreathWeight(points[i], points[i + 1]);
+      x *= amount;
+      y *= amount;
+
+      const flicker = .86 + .14 * Math.sin(seconds * (1.45 + speed) + seed * 2.4);
+      const red = Math.round(200 + 55 * tone);
+      const green = Math.round(7 + 39 * tone);
+      const blue = Math.round(14 + 34 * tone);
+      ctx.globalAlpha = alpha * flicker;
       ctx.fillStyle = 'rgb(' + red + ',' + green + ',' + blue + ')';
       const px = x * unit;
       const py = y * unit;
-      const pointSize = Math.max(.55, size * .91);
-      ctx.fillRect(px - pointSize / 2, py - pointSize / 2, pointSize, pointSize);
+      const pixelSize = Math.max(.55, size * .9);
+      ctx.fillRect(px - pixelSize / 2, py - pixelSize / 2, pixelSize, pixelSize);
     }
 
     ctx.restore();
