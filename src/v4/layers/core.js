@@ -8,6 +8,6 @@ export function createCoreParticle(rand) {
   return {
     x: p.x, y: p.y, z: p.z,
     kind: 0, nx: 0, ny: 0, nz: 0,
-    alpha: (.24 + rand() * .30) * (.78 + .25 * radial)
+    alpha: (.15 + rand() * .27) * (.76 + .24 * radial)
   };
 }

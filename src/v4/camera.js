@@ -1,6 +1,6 @@
 export const ORBIT = Object.freeze({
-  initialYaw: -0.26,
-  initialPitch: 0.10,
+  initialYaw: 0,
+  initialPitch: 0.02,
   minPitch: -1.12,
   maxPitch: 1.12,
   perspectiveDistance: 72,

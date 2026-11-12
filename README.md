@@ -90,3 +90,14 @@ MIT.
 - [Báo cáo kiểm thử hình học và đối chiếu ảnh phim 4.3](./V4_3_QA.md).
 
 Cảnh phim chỉ cung cấp ảnh/video tham khảo; đây không phải mã nguồn, rig hoặc dữ liệu hoạt hình chính thức của đoàn phim.
+
+## Phiên bản 4.4 — Trái tim hồng tròn theo ảnh mẫu
+
+- Dựng lại dáng tim bằng **một phương trình khối 3D duy nhất** thay vì ghép các elip dễ làm méo hai múi.
+- Hai múi trên tròn đầy, phần lõm cân đối, thân thu mềm về đáy; góc nhìn ngang là một khối cong, không có mặt cắt phẳng.
+- Phần giữa tối sâu hơn; viền là hạt hồng trắng có quầng sáng mạnh hơn, rải thêm một số trái tim nhỏ lấp lánh.
+- Góc nhìn đầu tiên hướng gần chính diện, khối tim lớn và rõ hơn trên màn hình.
+- Giữ xoay 3D, nhịp 0,90 giây, hạt bung theo bề mặt, zoom và chữ `love you` ẩn ở chế độ bình thường.
+- [Báo cáo kiểm thử 4.4](./V4_4_QA.md).
+
+Ảnh mẫu là hình nghệ thuật tĩnh được dùng làm định hướng phong cách; bản web là hiệu ứng 3D lập trình độc lập chứ không chèn ảnh vào nền.

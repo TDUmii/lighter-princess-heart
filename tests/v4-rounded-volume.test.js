@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {volumeThickness,surfacePoint,seededRandom,isInsideHeart} from '../src/v4/geometry.js';
+import {volumeThickness,surfacePoint,seededRandom,heartField} from '../src/v4/geometry.js';
 import {createParticleSystems,STRIDE} from '../src/v4/particles.js';
 import {HEART} from '../src/v4/config.js';
 import {pointVertex} from '../src/v4/shaders.js';
@@ -8,7 +8,8 @@ import {pointVertex} from '../src/v4/shaders.js';
 test('heart has a rounded 3D body, not a thin planar extrusion',()=>{
   assert.ok(volumeThickness(0,1)>10.5);
   assert.ok(volumeThickness(12,1)>5);
-  assert.ok(volumeThickness(16,1)<2);
+  assert.ok(volumeThickness(16,1)<5);
+  assert.ok(volumeThickness(19,1)<.1);
   assert.ok(volumeThickness(0,1)>volumeThickness(12,1));
   assert.ok(volumeThickness(0,15)<volumeThickness(0,1));
 });
@@ -18,7 +19,7 @@ test('surface samples hug the rounded heart front and back with outward normals'
   let front=0,back=0,positive=0;
   for(let i=0;i<650;i++){
     const p=surfacePoint(rand);
-    assert.ok(isInsideHeart(p.x,p.y));
+    assert.ok(Math.abs(heartField(p.x,p.y,p.z))<.0001);
     assert.ok(Number.isFinite(p.z));
     const l=Math.hypot(p.nx,p.ny,p.nz);
     assert.ok(Math.abs(l-1)<.00001);

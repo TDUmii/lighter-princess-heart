@@ -7,7 +7,7 @@ import {
 import { createParticleSystems, STRIDE } from '../src/v4/particles.js';
 
 function upperSurfaceAt(x,z) {
-  let outside=-18,inside=-3;
+  let outside=-22,inside=-4;
   assert.ok(heartField(x,outside,z)>0);
   assert.ok(heartField(x,inside,z)<0);
   for(let i=0;i<25;i++){
@@ -21,7 +21,7 @@ function upperSurfaceAt(x,z) {
 test('continuous 3D field creates two rounded lobes and a smooth top side profile',()=>{
   const lobeTop=upperSurfaceAt(7.6,0);
   const notchTop=upperSurfaceAt(0,0);
-  assert.ok(lobeTop< -13.7);
+  assert.ok(lobeTop < -17.0);
   assert.ok(notchTop-lobeTop>2);
   assert.ok(notchTop-lobeTop<7);
 

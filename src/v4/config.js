@@ -22,6 +22,6 @@ export function qualityFor(width, height, pixelRatio = 1) {
 export function heartUnit(width, height) {
   const mobile = width < HEART.mobileBreakpoint;
   return mobile
-    ? Math.min(width / 44.5, height / 47, 21)
-    : Math.min(width / 52, height / 50, 21);
+    ? Math.min(width / 44, height / 46, 21)
+    : Math.min(width / 57, height / 42, 21);
 }

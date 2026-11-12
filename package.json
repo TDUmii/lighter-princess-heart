@@ -1,10 +1,10 @@
 {
   "name": "trai-tim",
   "private": true,
-  "version": "4.3.0",
+  "version": "4.4.0",
   "type": "module",
   "scripts": {
-    "test": "node --test tests/v4.test.js tests/v4-orbit.test.js tests/v4-rounded-volume.test.js tests/v4-implicit-field.test.js",
+    "test": "node --test tests/v4.test.js tests/v4-orbit.test.js tests/v4-rounded-volume.test.js tests/v4-implicit-field.test.js tests/v4-reference-shape.test.js",
     "check": "node --check src/main.js && node --check src/v4/scene.js && node --check src/v4/renderer.js && node --check src/v4/shaders.js && node --check src/v4/fallback.js && node --check src/v4/particles.js && node --check src/v4/geometry.js && node --check src/v4/camera.js"
   }
 }

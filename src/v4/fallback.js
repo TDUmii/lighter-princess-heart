@@ -87,8 +87,9 @@ export class CanvasRenderer {
       y=1+(y-1)*scale;
 
       if (kind===0) {
-        z*=1+beat*(2.25-.8*radius);
+        z*=1+beat*(1.13-.35*radius);
       } else {
+        z*=1+beat*.46;
         x+=nx*.10*Math.sin(time*speed+seed);
         y+=ny*.10*Math.sin(time*speed+seed);
         z+=nz*.10*Math.sin(time*speed+seed);
@@ -105,8 +106,6 @@ export class CanvasRenderer {
         z+=nz*HEART.burstTravel*flight;
       }
 
-      const depthBulge=Math.min(1,Math.abs(z)/13.5);
-      y=1+(y-1)*(1-.22*depthBulge*depthBulge);
       const rotated=rotatePoint(x,y,z,yaw,pitch);
       const depthScale=perspectiveScale(rotated.z);
       const px=rotated.x*unit*.87*depthScale;

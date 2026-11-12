@@ -45,7 +45,8 @@ test('core points have real front-to-back depth', () => {
   assert.ok(Math.min(...depths)<-5);
   assert.ok(Math.max(...depths)>5);
   assert.ok(volumeThickness(0,1)>6);
-  assert.ok(volumeThickness(16,1)<3);
+  assert.ok(volumeThickness(16,1)<5);
+  assert.ok(volumeThickness(19,1)<.1);
 });
 
 test('rim normals point outward and never follow a tangential skew field', () => {

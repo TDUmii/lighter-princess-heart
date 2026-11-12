@@ -9,6 +9,6 @@ export function createShellParticle(rand) {
     z: p.z + p.nz * inset,
     kind: 1,
     nx: p.nx, ny: p.ny, nz: p.nz,
-    alpha: .43 + rand() * .32
+    alpha: .48 + rand() * .33
   };
 }
