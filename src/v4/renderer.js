@@ -93,7 +93,7 @@ export class VolumeRenderer {
     this.canvas.style.height = height + 'px';
     gl.viewport(0,0,this.canvas.width,this.canvas.height);
 
-    const expected = quality.core + quality.shell + quality.burst;
+    const expected = quality.core + quality.shell + (quality.rim ?? 0) + quality.burst;
     if (expected !== this.count) {
       const system = createParticleSystems(quality);
       this.count = system.count;
@@ -111,7 +111,7 @@ export class VolumeRenderer {
     const width = this.canvas.width;
     const height = this.canvas.height;
     const cx = (this.width * .5 + panX) * ratio;
-    const cy = (this.height * .5 + unit * 1.7 - panY) * ratio;
+    const cy = (this.height * .5 - unit * .9 - panY) * ratio;
 
     gl.clearColor(0,0,0,1);
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -144,7 +144,7 @@ export class VolumeRenderer {
     gl.blendFunc(gl.SRC_ALPHA,gl.ONE);
     for (let pass = 0; pass < 2; pass++) {
       gl.uniform1i(this.pointU.uPass,pass);
-      for (const name of ['core','shell','burst']) {
+      for (const name of ['core','shell','rim','burst']) {
         const { first,count } = this.layers[name];
         gl.drawArrays(gl.POINTS,first,count);
       }

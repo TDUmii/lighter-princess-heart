@@ -44,6 +44,7 @@ export class CanvasRenderer {
     const reduced = {
       core: Math.round(quality.core*weight),
       shell: Math.round(quality.shell*weight),
+      rim: Math.round((quality.rim ?? 0)*weight),
       burst: Math.round(quality.burst*weight)
     };
     const system = createParticleSystems(reduced);
@@ -56,7 +57,7 @@ export class CanvasRenderer {
     if (!this.data) return;
     const ctx = this.ctx;
     const originX = this.width * .5 + panX;
-    const originY = this.height * .5 - unit * 1.7 + panY;
+    const originY = this.height * .5 + unit * .9 + panY;
     ctx.setTransform(this.ratio,0,0,this.ratio,0,0);
     ctx.fillStyle = '#000105';
     ctx.fillRect(0,0,this.width,this.height);
@@ -87,7 +88,7 @@ export class CanvasRenderer {
       y=1+(y-1)*scale;
 
       z*=scale;
-      if (kind!==0) {
+      if (kind>0 && kind<3) {
         x+=nx*.10*Math.sin(time*speed+seed);
         y+=ny*.10*Math.sin(time*speed+seed);
         z+=nz*.10*Math.sin(time*speed+seed);
@@ -108,18 +109,19 @@ export class CanvasRenderer {
       const rotated=rotatePoint(x,y,z,yaw,pitch);
       const depthScale=perspectiveScale(rotated.z);
       const px=rotated.x*unit*.87*depthScale;
-      const py=rotated.y*unit*.92*depthScale;
+      const py=rotated.y*unit*.88*depthScale;
       const light=Math.min(1,Math.max(0,rotated.z/24+.54));
       const red=Math.round(226+29*tone);
       const green=Math.round(35+102*(.42*tone+.58*light));
       const blue=Math.round(74+95*(.42*tone+.58*light));
-      const surfaceNormal=kind===1?rotatePoint(nx,ny,nz,yaw,pitch):null;
-      const rimGlow=surfaceNormal
-        ? .60+.98*Math.pow(Math.max(0,1-Math.abs(surfaceNormal.z)),1.55)
-        : 1;
+      const surfaceNormal=(kind===1||kind===3)?rotatePoint(nx,ny,nz,yaw,pitch):null;
+      const grazing=surfaceNormal ? Math.max(0,1-Math.abs(surfaceNormal.z)) : 0;
+      const rimGlow=kind===3
+        ? .04+.58*Math.pow(grazing,2.25)
+        : surfaceNormal ? .60+.98*Math.pow(grazing,1.55) : 1;
       ctx.globalAlpha=Math.min(1,alpha*(.75+.30*light)*opacity*rimGlow);
       ctx.fillStyle='rgb('+red+','+green+','+blue+')';
-      const d=Math.max(.8,size*(kind===2?1.45:1.78)*Math.pow(zoom,.15));
+      const d=Math.max(.65,size*(kind===2?1.45:kind===3?1.1:1.78)*Math.pow(zoom,.15));
       const isLittleHeart=kind===2 || (((Math.sin(seed*93.271)*43758.5453)%1+1)%1 > .946);
       if((zoom>2.25&&kind!==2)||isLittleHeart){
         const heartSize=Math.max(1.6,d*(kind===2?2.1:2.25));

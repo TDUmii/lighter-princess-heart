@@ -88,6 +88,6 @@ export function deformScale(kind, radial, beat) {
   const r = Math.min(1, Math.max(0, radial));
   const weight = kind === 0
     ? (1.12 - .15 * r * r)
-    : .91;
+    : (kind === 3 ? 0 : .91);
   return 1 + beat * weight;
 }
