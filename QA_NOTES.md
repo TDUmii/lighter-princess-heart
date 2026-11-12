@@ -56,3 +56,10 @@ Chỉ đánh dấu hoàn tất khi GitHub Pages báo build thành công, trang v
 - Nén/bung nhịp chính: mép tim giữ gần ổn định, chiều rộng pixel threshold ~413px -> 421px; vùng trung tâm biến đổi mạnh hơn, không tạo lớp viền cứng.
 - Mobile 390x844: WebGL2 glError=0, zoom 450% hiện love you, reset 100% ẩn lại; Canvas fallback hoạt động; FPS ~60 trong giả lập trình duyệt, không phải trên máy thật.
 - 14 unit tests pass, syntax pass; QA_TEMP chỉ chứa ảnh nội bộ không đưa phim lên repository.
+
+## Phiên bản 3.3 - Frame video thật
+- Đã lấy 33 khung hình ở 69,0–72,2 giây từ https://www.bilibili.com/video/BV1Bg411B7md/. Chỉ lưu ảnh ở QA_TEMP trên máy test.
+- Chu kỳ ước lượng từ frame rộng 0,895 giây; dựng nhịp liên tục 0,90 giây, có radial traveling flow.
+- Không đổi density/color/static geometry của bản 3.2. WebGL2 và fallback dùng cùng chu kỳ và chuyển động tương tự.
+- Test tự động 15/15, desktop WebGL2 error 0, mobile 390 × 844 zoom và secret hoạt động, fallback Canvas2D hoạt động.
+- Xem [FILM_MOTION_QA.md](./FILM_MOTION_QA.md) để biết cách đo và giới hạn.

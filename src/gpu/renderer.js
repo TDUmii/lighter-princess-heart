@@ -1,4 +1,5 @@
 import { createParticleCloud, PARTICLE_STRIDE } from '../art/particles.js';
+import { ART } from '../config.js';
 import { fullscreenVertex, skyFragment, particleVertex, particleFragment } from './shaders.js';
 
 function compile(gl, type, source) {
@@ -57,7 +58,7 @@ export class ParticleRenderer {
     ]);
     this.particleUniforms = findUniforms(gl, this.particles, [
       'uResolution', 'uCenter', 'uUnit', 'uTime',
-      'uZoom', 'uRatio', 'uBeat', 'uPan', 'uPass'
+      'uZoom', 'uRatio', 'uBeat', 'uPulsePeriod', 'uPan', 'uPass'
     ]);
 
     this.vertexArray = gl.createVertexArray();
@@ -145,6 +146,7 @@ export class ParticleRenderer {
     gl.uniform1f(this.particleUniforms.uZoom, zoom);
     gl.uniform1f(this.particleUniforms.uRatio, ratio);
     gl.uniform1f(this.particleUniforms.uBeat, beat);
+    gl.uniform1f(this.particleUniforms.uPulsePeriod, ART.pulsePeriod);
     gl.uniform2f(this.particleUniforms.uPan, 0, 0);
 
     gl.uniform1i(this.particleUniforms.uPass, 0);

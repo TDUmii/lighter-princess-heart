@@ -8,7 +8,7 @@ Một trái tim **hồng đỏ dịu** kết từ những trái tim nhỏ chuy�
 
 - Trái tim nhỏ, mịn, mật độ dồn nhẹ gần rìa, tâm tối và thoáng; không vẽ thành một dải viền đặc.
 - Mỗi hạt trôi và nhấp nháy riêng, giữ tổng thể trái tim ổn định.
-- Nhịp đôi theo pha nén, bung, dội, nhịp phụ và hồi phục. Hạt trong lòng tim dịch chuyển hướng tâm mạnh hơn, còn đường bao chỉ nhúc nhích nhẹ và các hạt ngoài vẫn trôi riêng. Tất cả dùng **một trường biến dạng liên tục, không tách viền lõi/vỏ**.
+- Nhịp liền mạch khoảng 0,90 giây, đối chiếu từ video phim. Hạt bên trong co/bung đồng thời có sóng lan ra và dòng chuyển động xoáy nhẹ; viền vẫn chuyển động mềm, không tạo vạch ngăn giữa lõi và vỏ.
 - Quầng sáng đỏ hồng rõ hơn và chùm tia mềm được vẽ **phía sau toàn bộ khối trái tim**, không phụ thuộc vào các hạt phát sáng đơn lẻ.
 - Chữ viết tay **“love you”** nằm ẩn ở giữa, chỉ hiện khi phóng to từ khoảng 245%, rõ khi zoom trên 330%.
 - Zoom bằng con lăn chuột, chụm hai ngón hoặc nút +/−; kéo khi đang phóng to, chọn 100% để đặt lại.
@@ -31,8 +31,8 @@ Mở http://localhost:8000. Không cần npm install hoặc tải thư viện b�
 | `src/config.js` | Nhịp tim, màu sắc, mật độ, ánh sáng |
 | `src/geometry.js` | Hình học trái tim |
 | `src/art/particles.js` | Tạo và phân bố hạt |
-| `src/art/deformation.js` | Công thức nhịp mềm cho bộ vẽ dự phòng và kiểm thử |
-| `src/art/heartbeat.js` | Nhịp đôi, biên độ nhỏ |
+| `src/art/deformation.js` | Trường biến dạng hướng tâm và dòng hạt lan truyền |
+| `src/art/heartbeat.js` | Chu kỳ nhịp theo số liệu clip tham khảo |
 | `src/gpu/shaders.js` | Shader hạt, quầng sáng phía sau và tia sáng |
 | `src/gpu/renderer.js` | Vẽ bằng WebGL2 |
 | `src/fallback.js` | Canvas 2D khi không dùng được GPU |
@@ -71,3 +71,10 @@ MIT. Đây là hiệu ứng được lập trình mới, không sử dụng mã 
 - Chuyển trọng tâm nhịp đập vào phần trong, giữ dáng đường bao ổn định; hạt ngoài vẫn chuyển động nhẹ.
 - Kiểm thử 4 pha ở desktop và zoom 450% trên điện thoại. Đây là bản tham khảo thị giác, **chưa phải chuyển động được đo chính xác frame-by-frame từ video phim**.
 - Xem thêm [VISUAL_QA.md](./VISUAL_QA.md).
+
+## Phiên bản 3.3 - Hiệu chỉnh từng frame
+- Xem trực tiếp clip tham khảo: https://www.bilibili.com/video/BV1Bg411B7md/ (đoạn trái tim 69–72,2 giây).
+- Đối chiếu 33 frame cách nhau 0,1 giây; chu kỳ chiều rộng xấp xỉ 0,895 giây, làm tròn thành 0,90 giây trong code.
+- Thay nhịp double-beat cũ bằng nhịp chính liên tục, thêm sóng hạt hướng tâm và dòng xoáy nhẹ chạy từ trong ra ngoài.
+- Giữ hình dáng, bảng màu, mật độ và các tính năng của bản 3.2; chỉ thay đổi thuật toán chuyển động và độ sáng chuyển động.
+- Phương pháp, dữ liệu và giới hạn được trình bày tại [FILM_MOTION_QA.md](./FILM_MOTION_QA.md).

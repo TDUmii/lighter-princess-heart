@@ -1,5 +1,6 @@
 import { createParticleCloud, PARTICLE_STRIDE } from './art/particles.js';
-import { deformPoint } from './art/deformation.js';
+import { deformPoint, radialBeatWeight } from './art/deformation.js';
+import { ART } from './config.js';
 
 export class CanvasFallback {
   constructor(canvas) {
@@ -100,7 +101,7 @@ export class CanvasFallback {
       let x = points[i] * (1 + depth * .045) + motionX;
       let y = points[i + 1] * (1 + depth * .045) + motionY;
 
-      const position = deformPoint(x, y, beat);
+      const position = deformPoint(x, y, beat, seconds);
       x = position.x;
       y = position.y;
 
@@ -108,7 +109,15 @@ export class CanvasFallback {
       const red = Math.round(200 + 55 * tone);
       const green = Math.round(7 + 39 * tone);
       const blue = Math.round(14 + 34 * tone);
-      ctx.globalAlpha = alpha * flicker;
+      const radius = Math.hypot(points[i] / 16, (points[i + 1] - 1) / 16);
+      const offset = (radius - .60) / .38;
+      const band = Math.exp(-offset * offset);
+      const phase = Math.PI * 2 * (seconds / ART.pulsePeriod - .25 * radius);
+      const waveBrightness = 1 + beat * .95 *
+        radialBeatWeight(points[i], points[i + 1]) +
+        .10 * band * Math.sin(phase + .35);
+      ctx.globalAlpha = alpha * flicker *
+        Math.min(1.18, Math.max(.80, waveBrightness));
       ctx.fillStyle = 'rgb(' + red + ',' + green + ',' + blue + ')';
       const px = x * unit * .80;
       const py = y * unit * .88;
