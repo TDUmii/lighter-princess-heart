@@ -3,6 +3,7 @@ import { heartbeat } from './heartbeat.js';
 import { VolumeRenderer } from './renderer.js';
 import { CanvasRenderer } from './fallback.js';
 import { ORBIT, clamp } from './camera.js';
+import { withinHeart } from './effects.js';
 
 export class HeartScene {
   constructor(canvas, zoomLabel) {
@@ -39,6 +40,8 @@ export class HeartScene {
     this.lastQualityChange = performance.now();
     this.stableWindows = 0;
     this.fps = 0;
+    this.touch = { x: -10000, y: -10000, strength: 0, target: 0, owner: null };
+    this.touchRadius = 110;
 
     try {
       this.renderer = new VolumeRenderer(canvas);
@@ -71,6 +74,17 @@ export class HeartScene {
       this.pointers.set(event.pointerId,{x:event.clientX,y:event.clientY,time:now});
       this.touchStart=now;
       this.lastInteraction=now;
+      if (this.pointers.size===1 && withinHeart(event.clientX,event.clientY,
+        this.width,this.height,this.unit,this.zoom,this.panX,this.panY)) {
+        this.touch.x=event.clientX;
+        this.touch.y=event.clientY;
+        this.touch.owner=event.pointerId;
+        this.touch.target=1;
+        if(this.reducedMotion.matches){this.touch.strength=1;this.draw(now);}
+      } else if(this.pointers.size>1){
+        this.touch.target=0;
+        this.touch.owner=null;
+      }
       this.yawVelocity=0;
       this.pitchVelocity=0;
       try{this.canvas.setPointerCapture(event.pointerId);}catch{}
@@ -82,6 +96,10 @@ export class HeartScene {
       const now = performance.now();
       this.pointers.set(event.pointerId,{x:event.clientX,y:event.clientY,time:now});
       this.lastInteraction=now;
+      if (this.touch.owner===event.pointerId && this.pointers.size===1) {
+        this.touch.x=event.clientX;
+        this.touch.y=event.clientY;
+      }
       if(this.pointers.size===2&&this.pinch){
         const [a,b]=this.pointers.values();
         this.setZoom(this.pinch.zoom*Math.hypot(a.x-b.x,a.y-b.y)/this.pinch.distance);
@@ -105,6 +123,11 @@ export class HeartScene {
     for(const type of ['pointerup','pointercancel']){
       this.canvas.addEventListener(type,event=>{
         this.pointers.delete(event.pointerId);
+        if (this.touch.owner===event.pointerId || this.pointers.size===0) {
+          this.touch.owner=null;
+          this.touch.target=0;
+          if(this.reducedMotion.matches){this.touch.strength=0;this.draw(performance.now());}
+        }
         if(this.canvas.hasPointerCapture(event.pointerId)){
           this.canvas.releasePointerCapture(event.pointerId);
         }
@@ -152,6 +175,7 @@ export class HeartScene {
     this.height=height;
     this.unit=heartUnit(width,height);
     this.quality=qualityFor(width,height,window.devicePixelRatio||1,this.qualityTier);
+    this.touchRadius=width<640?96:128;
     this.renderer.resize(width,height,this.quality);
     this.draw(performance.now());
   }
@@ -200,6 +224,9 @@ export class HeartScene {
     this.lastFrame=now;
     this.zoom+=(this.targetZoom-this.zoom)*(1-Math.exp(-delta/110));
     if(Math.abs(this.zoom-this.targetZoom)<.001)this.zoom=this.targetZoom;
+    this.touch.strength+=(this.touch.target-this.touch.strength)
+      *(1-Math.exp(-delta/(this.touch.target?90:240)));
+    if(this.touch.strength<.001 && !this.touch.target)this.touch.strength=0;
 
     if(!this.pointers.size){
       // Preserve the exact camera angle after a drag: no automatic spin or inertia.
@@ -239,7 +266,7 @@ export class HeartScene {
 
   diagnostics() {
     return {
-      version: '5.0',
+      version: '6.0',
       engine: this.engine,
       tier: this.qualityTier,
       fps: this.fps,
@@ -248,7 +275,9 @@ export class HeartScene {
       pixelRatio: this.quality?.pixelRatio ?? 0,
       yaw: this.yaw,
       pitch: this.pitch,
-      zoom: this.zoom
+      zoom: this.zoom,
+      touchStrength: Number(this.touch.strength.toFixed(3)),
+      touchActive: !!this.touch.target
     };
   }
 
@@ -259,7 +288,9 @@ export class HeartScene {
     this.renderer.render({
       time,beat,zoom:this.zoom,unit:this.unit,
       panX:this.panX,panY:this.panY,
-      yaw:this.yaw,pitch:this.pitch
+      yaw:this.yaw,pitch:this.pitch,
+      touch:{x:this.touch.x,y:this.touch.y,strength:this.touch.strength,
+        radius:this.touchRadius},reducedMotion:reduced
     });
     if(!this.secret)return;
     const reveal=clamp((this.zoom-HEART.secretZoom)/.68,0,1);

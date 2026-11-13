@@ -2,6 +2,7 @@ import { HEART } from './config.js';
 import { createParticleSystems, STRIDE } from './particles.js';
 import { beatPhase, flightProgress, flightOpacity, flightDistance, deformScale } from './heartbeat.js';
 import { rotatePoint, perspectiveScale } from './camera.js';
+import { shockwaveRings, touchFalloff } from './effects.js';
 
 function makeSprite() {
   const sprite = document.createElement('canvas');
@@ -53,7 +54,8 @@ export class CanvasRenderer {
     this.layers = system.layers;
   }
 
-  render({ time, beat, zoom, unit, panX, panY, yaw = 0, pitch = 0 }) {
+  render({ time, beat, zoom, unit, panX, panY, yaw = 0, pitch = 0,
+    touch = { x:-10000, y:-10000, strength:0, radius:110 }, reducedMotion = false }) {
     if (!this.data) return;
     const ctx = this.ctx;
     const originX = this.width * .5 + panX;
@@ -72,7 +74,17 @@ export class CanvasRenderer {
     ctx.fillStyle=aura;
     ctx.fillRect(-unit*34,-unit*34,unit*68,unit*68);
     ctx.globalCompositeOperation='screen';
-
+    for (const ring of shockwaveRings(time,reducedMotion)) {
+      if (ring.strength<.005) continue;
+      ctx.beginPath();
+      ctx.arc(0,0,unit*ring.radius,0,Math.PI*2);
+      ctx.lineWidth=Math.max(.7,unit*.10);
+      ctx.strokeStyle='rgba(255,88,140,'+(ring.strength*.10).toFixed(3)+')';
+      ctx.stroke();
+    }
+    const sweepX=-.2+.55*Math.sin(time*.43*(reducedMotion?0:1));
+    const sweepY=.12+.25*Math.cos(time*.33*(reducedMotion?0:1));
+    const sweepLen=Math.hypot(sweepX,sweepY,.96);
     const a=this.data;
     const phase=beatPhase(time);
     for (let i=0;i<this.count;i++) {
@@ -115,25 +127,39 @@ export class CanvasRenderer {
       const py=rotated.y*unit*.88*depthScale;
       const t=Math.max(0,Math.min(1,(rotated.z+19)/39));
       const light=t*t*(3-2*t);
+      const screenX=originX+px*zoom, screenY=originY+py*zoom;
+      const touchDistance=Math.hypot(screenX-touch.x,screenY-touch.y);
+      const influence=touch.strength*touchFalloff(touchDistance,touch.radius);
+      let drawX=px, drawY=py;
+      if(influence>.001){
+        drawX+=(screenX-touch.x)/(touchDistance+.01)*influence*7/zoom;
+        drawY+=(screenY-touch.y)/(touchDistance+.01)*influence*7/zoom;
+      }
       const red=Math.round(226+29*tone);
       const green=Math.round(35+102*(.42*tone+.58*light));
       const blue=Math.round(74+95*(.42*tone+.58*light));
       const surfaceNormal=(kind===1||kind===3)?rotatePoint(nx,ny,nz,yaw,pitch):null;
       const grazing=surfaceNormal ? Math.max(0,1-Math.abs(surfaceNormal.z)) : 0;
+      const diffuse=surfaceNormal
+        ? Math.max(0,surfaceNormal.x*(-.34)+surfaceNormal.y*.26+surfaceNormal.z*.91) : .57;
+      const sheen=surfaceNormal
+        ? Math.pow(Math.max(0,(surfaceNormal.x*sweepX+
+            surfaceNormal.y*sweepY+surfaceNormal.z*.96)/sweepLen),13) : .10;
       const rimGlow=kind===3
         ? .07+.36*Math.pow(grazing,2.25)
         : surfaceNormal ? .38+.80*Math.pow(grazing,1.55) : 1;
-      ctx.globalAlpha=Math.min(1,alpha*(.75+.30*light)*opacity*rimGlow);
+      ctx.globalAlpha=Math.min(1,alpha*(.75+.30*light)*opacity*rimGlow
+        *(.87+.20*diffuse+.06*sheen)*(1+.52*influence)*1.55);
       ctx.fillStyle='rgb('+red+','+green+','+blue+')';
-      const d=Math.max(.55,size*(kind===2?1.20:kind===3?.88:1.68)*Math.pow(zoom,.15));
+      const d=Math.max(.55,size*(kind===2?1.20:kind===3?.90:2.0)*Math.pow(zoom,.15));
       const symbol=((Math.sin(seed*93.271)*43758.5453)%1+1)%1;
       const isLittleHeart=(kind===0 && symbol>.992) || (kind===2 && symbol>.83);
       if((zoom>2.25&&kind<3)||isLittleHeart){
         const heartSize=Math.max(1.4,d*(kind===2?1.55:2.0));
-        ctx.drawImage(this.sprite,px-heartSize/2,py-heartSize/2,heartSize,heartSize);
+        ctx.drawImage(this.sprite,drawX-heartSize/2,drawY-heartSize/2,heartSize,heartSize);
       } else {
         ctx.beginPath();
-        ctx.arc(px,py,d*.51,0,Math.PI*2);
+        ctx.arc(drawX,drawY,d*.51*(1+.12*influence),0,Math.PI*2);
         ctx.fill();
       }
     }

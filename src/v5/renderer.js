@@ -48,11 +48,13 @@ export class VolumeRenderer {
     this.sky = program(gl, skyVertex, skyFragment);
     this.points = program(gl, pointVertex, pointFragment);
     this.skyU = uniforms(gl, this.sky, [
-      'uResolution', 'uCenter', 'uUnit', 'uZoom', 'uTime', 'uBeat'
+      'uResolution', 'uCenter', 'uUnit', 'uZoom', 'uTime', 'uBeat',
+      'uPeriod', 'uMotion'
     ]);
     this.pointU = uniforms(gl, this.points, [
       'uResolution', 'uCenter', 'uUnit', 'uZoom', 'uRatio',
-      'uTime', 'uPeriod', 'uBeat', 'uBurstTravel', 'uYaw', 'uPitch', 'uPass'
+      'uTime', 'uPeriod', 'uBeat', 'uBurstTravel', 'uYaw', 'uPitch', 'uPass',
+      'uTouch', 'uMotion'
     ]);
 
     this.vao = gl.createVertexArray();
@@ -104,7 +106,8 @@ export class VolumeRenderer {
     }
   }
 
-  render({ time, beat, zoom, unit, panX, panY, yaw = 0, pitch = 0 }) {
+  render({ time, beat, zoom, unit, panX, panY, yaw = 0, pitch = 0,
+    touch = { x: -10000, y: -10000, strength: 0, radius: 110 }, reducedMotion = false }) {
     if (!this.layers || this.lost) return;
     const gl = this.gl;
     const ratio = this.ratio;
@@ -124,6 +127,8 @@ export class VolumeRenderer {
     gl.uniform1f(this.skyU.uZoom,zoom);
     gl.uniform1f(this.skyU.uTime,time);
     gl.uniform1f(this.skyU.uBeat,beat);
+    gl.uniform1f(this.skyU.uPeriod,HEART.period);
+    gl.uniform1f(this.skyU.uMotion,reducedMotion?0:1);
     gl.drawArrays(gl.TRIANGLES,0,3);
 
     gl.useProgram(this.points);
@@ -139,6 +144,9 @@ export class VolumeRenderer {
     gl.uniform1f(this.pointU.uBurstTravel,HEART.burstTravel);
     gl.uniform1f(this.pointU.uYaw,yaw);
     gl.uniform1f(this.pointU.uPitch,pitch);
+    gl.uniform4f(this.pointU.uTouch,touch.x*ratio,
+      (this.height-touch.y)*ratio,touch.strength,touch.radius*ratio);
+    gl.uniform1f(this.pointU.uMotion,reducedMotion?0:1);
 
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA,gl.ONE);
