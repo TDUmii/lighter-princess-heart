@@ -129,10 +129,12 @@ export class CanvasRenderer {
       const tone=a[j+7], nx=a[j+8], ny=a[j+9], nz=a[j+12];
       const delay=a[j+10],speed=a[j+11];
       const radius=Math.min(1,Math.hypot(x/16,(y-1)/17));
-      const scale=deformScale(kind,radius,beat);
+      let scale=deformScale(kind,radius,beat);
+      const inhale=smoothstep((phase-.13)/.12)*
+        (1-smoothstep((phase-.32)/.12));
+      if(kind<1.5) scale *= 1+.026*inhale;
       x*=scale;
       y=1+(y-1)*scale;
-
       z*=scale;
       if (kind===1) {
         x+=nx*.08*Math.sin(time*speed+seed);
@@ -141,16 +143,16 @@ export class CanvasRenderer {
       }
 
       let opacity=1;
-      if (kind===2) {
+      if (kind>1.5 && kind<2.5) {
         const progress=flightProgress(phase,delay);
         opacity=flightOpacity(phase,delay);
         if(opacity<=0)continue;
         const distance=flightDistance(phase,delay);
         const organic=((Math.sin(seed*19.731)*43563.123)%1+1)%1;
-        const travel=distance*(.79+.39*organic);
+        const travel=distance*(.70+.45*organic);
         const arc=Math.sin(Math.PI*distance/HEART.burstTravel);
-        x+=nx*travel-ny*arc*(organic-.5)*.72;
-        y+=ny*travel+nx*arc*(organic-.5)*.72;
+        x+=nx*travel-ny*arc*(organic-.5)*.88;
+        y+=ny*travel+nx*arc*(organic-.5)*.88;
         z+=nz*travel+arc*.26*Math.sin(seed*2.21);
         // Outgoing and incoming hearts retain the same opacity.
       }
@@ -195,14 +197,19 @@ export class CanvasRenderer {
       ctx.globalAlpha=Math.min(1,alpha*(.75+.30*light)*opacity*rimGlow
         *(.87+.20*diffuse+.06*sheen)*
           (1+.52*influence+.22*magnet+
-            charge*(kind===0?.55:.08))*1.55);
+            charge*(kind===0?.55:.08))*1.55*
+        (kind>2.1 && kind<2.5 ? .88 : 1));
       ctx.fillStyle='rgb('+red+','+green+','+blue+')';
-      const d=Math.max(.55,size*(kind===2?1.20:kind===3?.90:2.0)*
+      const flyScale=kind>1.5 && kind<2.5
+        ? (kind>2.1 ? .67 : 1.20)
+        : (kind===3 ? .90 : 2.0);
+      const d=Math.max(.55,size*flyScale*
         Math.pow(zoom,.15)*(1+.15*magnet+(kind===0?.23*charge:0)));
       const symbol=((Math.sin(seed*93.271)*43758.5453)%1+1)%1;
-      const isLittleHeart=(kind===0 && symbol>.992) || (kind===2 && symbol>.83);
+      const isLittleHeart=(kind===0 && symbol>.992) ||
+        (kind>=1.5 && kind<2.1 && symbol>.83);
       if((zoom>2.25&&kind<3)||isLittleHeart){
-        const heartSize=Math.max(1.4,d*(kind===2?1.55:2.0));
+        const heartSize=Math.max(1.4,d*(kind>=1.5 && kind<2.1?1.55:2.0));
         ctx.drawImage(this.sprite,drawX-heartSize/2,drawY-heartSize/2,heartSize,heartSize);
       } else {
         ctx.beginPath();

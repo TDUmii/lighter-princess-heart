@@ -20,7 +20,9 @@ function write(data, index, particle, rand) {
   data[o + 4] = rand() * Math.PI * 2;
   data[o + 5] = particle.kind === RIM
     ? .44 + Math.pow(rand(), 1.7) * .29
-    : .54 + Math.pow(rand(), 1.9) * (particle.kind === CORE ? .78 : .72);
+    : particle.kind > 2.1 && particle.kind < 2.5
+      ? .30 + Math.pow(rand(), 1.6) * .52
+      : .54 + Math.pow(rand(), 1.9) * (particle.kind === CORE ? .78 : .72);
   data[o + 6] = particle.alpha;
   data[o + 7] = rand();
   data[o + 8] = particle.nx;
@@ -64,7 +66,11 @@ export function createParticleSystems(quality, seed = HEART.seed) {
   const rimFirst = core + shell;
   const burstFirst = rimFirst + rim;
   writeBalancedPairs(data, rimFirst, rim, createRimParticle, rand);
-  writeBalancedPairs(data, burstFirst, burst, createBurstParticle, rand, true);
+  // Keep the shell symmetric but every flying spark independently randomized.
+  // Mirrored pairs on the burst layer looked like two diagonal cracks.
+  for (let i = burstFirst; i < count; i++) {
+    write(data, i, createBurstParticle(rand), rand);
+  }
 
   return {
     data, count,

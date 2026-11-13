@@ -51,7 +51,8 @@ test('balanced silhouette particles mirror the shell and remain finite', () => {
   assert.equal(sys.count, q.core + q.shell + q.rim + q.burst);
   assert.equal(sys.data.length, sys.count * STRIDE);
   for (const x of sys.data) assert.ok(Number.isFinite(x));
-  for (const name of ['shell', 'rim', 'burst']) {
+  // Only the resting skin and rim are mirrored; flying sparks must be independent.
+  for (const name of ['shell', 'rim']) {
     const { first, count } = sys.layers[name];
     for (let i = first; i < first + count - 1; i += 2) {
       const a = i * STRIDE, b = (i + 1) * STRIDE;
