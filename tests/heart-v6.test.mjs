@@ -60,8 +60,8 @@ test('soft wave tracks the real heart outline, not a circle',async()=>{
     distances.push(Math.hypot(p.x,p.y-1.1));
   }
   assert.ok(Math.max(...distances)-Math.min(...distances)>2);
-  assert.ok(SHOCKWAVE.travel<3);
-  assert.ok(shockwaveRings(SHOCKWAVE.second*HEART.period)[1].strength<.5);
+  assert.ok(SHOCKWAVE.travel>=4 && SHOCKWAVE.travel<=5);
+  assert.ok(shockwaveRings(SHOCKWAVE.second*HEART.period)[1].strength<.6);
   assert.match(skyFragment,/heartEdgeDistance\(p\)/);
   assert.match(pointVertex,/heartRipple\(edgeDistance/);
 });

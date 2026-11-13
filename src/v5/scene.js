@@ -266,7 +266,7 @@ export class HeartScene {
 
   diagnostics() {
     return {
-      version: '6.1',
+      version: '6.2',
       engine: this.engine,
       tier: this.qualityTier,
       fps: this.fps,

@@ -4,9 +4,9 @@ import { isInsideHeart } from './geometry.js';
 export const SHOCKWAVE = Object.freeze({
   first: .145,
   second: .325,
-  duration: .38,
+  duration: .40,
   startOffset: .18,
-  travel: 2.65
+  travel: 4.2
 });
 
 export function smooth01(value) {
@@ -23,10 +23,10 @@ export function shockwaveRings(seconds, reducedMotion = false) {
     const progress = Math.min(1, age / SHOCKWAVE.duration);
     return {
       progress,
-      // A short, feather-light ripple just outside the heart contour.
+      // A soft, slightly wider ripple just outside the heart contour.
       offset: SHOCKWAVE.startOffset + SHOCKWAVE.travel * smooth01(progress),
       strength: age < SHOCKWAVE.duration
-        ? (index === 0 ? .36 : .48) * (1 - smooth01(progress)) : 0
+        ? (index === 0 ? .40 : .54) * (1 - smooth01(progress)) : 0
     };
   });
 }
