@@ -4,6 +4,8 @@ import { VolumeRenderer } from './renderer.js';
 import { CanvasRenderer } from './fallback.js';
 import { ORBIT, clamp } from './camera.js';
 import { withinHeart } from './effects.js';
+import { HeartInteraction } from './interaction.js';
+import { StardustTrail } from './trail.js';
 
 export class HeartScene {
   constructor(canvas, zoomLabel) {
@@ -42,6 +44,7 @@ export class HeartScene {
     this.fps = 0;
     this.touch = { x: -10000, y: -10000, strength: 0, target: 0, owner: null };
     this.touchRadius = 110;
+    this.interaction = new HeartInteraction();
 
     try {
       this.renderer = new VolumeRenderer(canvas);
@@ -55,6 +58,7 @@ export class HeartScene {
       console.info('Using Canvas2D compatibility mode:',error.message);
     }
 
+    this.trail = new StardustTrail(this.canvas);
     this.drawFrame = this.drawFrame.bind(this);
     this.handleResize = this.handleResize.bind(this);
   }
@@ -67,11 +71,27 @@ export class HeartScene {
       const delta=clamp(event.deltaY,-200,200);
       this.setZoom(this.targetZoom*Math.exp(-delta*.00145));
     },{passive:false});
-    this.canvas.addEventListener('dblclick',()=>this.resetView());
+    this.canvas.addEventListener('dblclick',event=>{
+      event.preventDefault();
+      // Double clicking the heart now bursts; the button remains the reliable reset.
+      if (!withinHeart(event.clientX,event.clientY,
+        this.width,this.height,this.unit,this.zoom,this.panX,this.panY)) this.resetView();
+    });
+    this.canvas.addEventListener('pointerleave',event=>{
+      if (event.pointerType!=='touch') this.interaction.moveHover(0,0,false);
+    });
 
     this.canvas.addEventListener('pointerdown',event=>{
       const now = performance.now();
       this.pointers.set(event.pointerId,{x:event.clientX,y:event.clientY,time:now});
+      if (this.pointers.size===1) {
+        const inside=withinHeart(event.clientX,event.clientY,
+          this.width,this.height,this.unit,this.zoom,this.panX,this.panY);
+        this.interaction.start(event.pointerId,event.clientX,event.clientY,now,inside);
+        this.interaction.moveHover(0,0,false);
+      } else {
+        for (const id of this.pointers.keys()) this.interaction.cancel(id);
+      }
       this.touchStart=now;
       this.lastInteraction=now;
       if (this.pointers.size===1 && withinHeart(event.clientX,event.clientY,
@@ -91,9 +111,14 @@ export class HeartScene {
       this.updatePinch();
     });
     this.canvas.addEventListener('pointermove',event=>{
-      const prev=this.pointers.get(event.pointerId);
-      if(!prev)return;
       const now = performance.now();
+      const prev=this.pointers.get(event.pointerId);
+      const near=withinHeart(event.clientX,event.clientY,this.width,this.height,
+        this.unit,this.zoom*1.13,this.panX,this.panY);
+      this.interaction.moveHover(event.clientX,event.clientY,near&&!prev,event.pointerType);
+      this.trail.emit(event.clientX,event.clientY,now,near&&!this.reducedMotion.matches);
+      if(!prev)return;
+      this.interaction.move(event.pointerId,event.clientX,event.clientY);
       this.pointers.set(event.pointerId,{x:event.clientX,y:event.clientY,time:now});
       this.lastInteraction=now;
       if (this.touch.owner===event.pointerId && this.pointers.size===1) {
@@ -122,7 +147,17 @@ export class HeartScene {
     });
     for(const type of ['pointerup','pointercancel']){
       this.canvas.addEventListener(type,event=>{
+        const now=performance.now();
+        if(type==='pointercancel'||this.pointers.size!==1)
+          this.interaction.cancel(event.pointerId);
+        else
+          this.interaction.finish(event.pointerId,event.clientX,event.clientY,now,
+            {reduced:this.reducedMotion.matches});
         this.pointers.delete(event.pointerId);
+        if(event.pointerType!=='touch')
+          this.interaction.moveHover(event.clientX,event.clientY,
+            withinHeart(event.clientX,event.clientY,this.width,this.height,
+              this.unit,this.zoom*1.13,this.panX,this.panY),event.pointerType);
         if (this.touch.owner===event.pointerId || this.pointers.size===0) {
           this.touch.owner=null;
           this.touch.target=0;
@@ -142,12 +177,17 @@ export class HeartScene {
       if(event.key==='0')this.resetZoom();
     });
     document.addEventListener('visibilitychange',()=>{
-      if(document.hidden)this.stop();
+      if(document.hidden){
+        if(this.interaction.press)this.interaction.cancel(this.interaction.press.pointerId);
+        this.interaction.moveHover(0,0,false);
+        this.stop();
+      }
       else this.resume();
     });
     this.reducedMotion.addEventListener('change',()=>{
       this.stop();
       this.draw(performance.now());
+      this.trail.draw(performance.now(),0,this.reducedMotion.matches);
       this.resume();
     });
     this.resume();
@@ -177,6 +217,7 @@ export class HeartScene {
     this.quality=qualityFor(width,height,window.devicePixelRatio||1,this.qualityTier);
     this.touchRadius=width<640?96:128;
     this.renderer.resize(width,height,this.quality);
+    this.trail.resize(width,height,this.quality.pixelRatio);
     this.draw(performance.now());
   }
 
@@ -227,6 +268,7 @@ export class HeartScene {
     this.touch.strength+=(this.touch.target-this.touch.strength)
       *(1-Math.exp(-delta/(this.touch.target?90:240)));
     if(this.touch.strength<.001 && !this.touch.target)this.touch.strength=0;
+    this.interaction.frame(delta,now,this.reducedMotion.matches);
 
     if(!this.pointers.size){
       // Preserve the exact camera angle after a drag: no automatic spin or inertia.
@@ -234,6 +276,7 @@ export class HeartScene {
     }
 
     this.draw(now);
+    this.trail.draw(now,delta,this.reducedMotion.matches);
     this.frameCounter++;
     if (!this.fpsWindow) this.fpsWindow = now;
     const elapsed = now - this.fpsWindow;
@@ -260,13 +303,14 @@ export class HeartScene {
     this.qualityTier = next;
     this.quality = qualityFor(this.width, this.height, window.devicePixelRatio || 1, next);
     this.renderer.resize(this.width, this.height, this.quality);
+    this.trail.resize(this.width, this.height, this.quality.pixelRatio);
     this.lastQualityChange = now;
     this.stableWindows = 0;
   }
 
   diagnostics() {
     return {
-      version: '6.2',
+      version: '7.0',
       engine: this.engine,
       tier: this.qualityTier,
       fps: this.fps,
@@ -277,7 +321,14 @@ export class HeartScene {
       pitch: this.pitch,
       zoom: this.zoom,
       touchStrength: Number(this.touch.strength.toFixed(3)),
-      touchActive: !!this.touch.target
+      touchActive: !!this.touch.target,
+      hoverStrength: Number(this.interaction.hover.strength.toFixed(3)),
+      charge: Number(this.interaction.charge.toFixed(3)),
+      chargeWave: Number(this.interaction.state(performance.now()).chargeWave.strength.toFixed(3)),
+      burst: Number(this.interaction.state(performance.now()).burst.toFixed(3)),
+      chargeCount: this.interaction.chargeCount,
+      burstCount: this.interaction.burstCount,
+      trailCount: this.trail.particles.length
     };
   }
 
@@ -290,14 +341,16 @@ export class HeartScene {
       panX:this.panX,panY:this.panY,
       yaw:this.yaw,pitch:this.pitch,
       touch:{x:this.touch.x,y:this.touch.y,strength:this.touch.strength,
-        radius:this.touchRadius},reducedMotion:reduced
+        radius:this.touchRadius},
+      interaction:this.interaction.state(now,reduced),reducedMotion:reduced
     });
     if(!this.secret)return;
     const reveal=clamp((this.zoom-HEART.secretZoom)/.68,0,1);
     this.secret.style.visibility=reveal>0.005?'visible':'hidden';
     this.secret.setAttribute('aria-hidden',reveal>0.005?'false':'true');
     this.secret.style.opacity=(reveal*.93).toFixed(3);
-    this.secret.style.left=(this.width*.5+this.panX)+'px';    this.secret.style.top=(this.height*.5+this.unit*.9+this.panY)+'px';
+    this.secret.style.left=(this.width*.5+this.panX)+'px';
+    this.secret.style.top=(this.height*.5+this.unit*.9+this.panY)+'px';
     this.secret.style.transform='translate(-50%, -50%) scale('+clamp(this.zoom*.74,.8,2.25).toFixed(3)+')';
   }
 }

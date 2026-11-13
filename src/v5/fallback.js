@@ -4,6 +4,7 @@ import { beatPhase, flightProgress, flightOpacity, flightDistance, deformScale }
 import { rotatePoint, perspectiveScale } from './camera.js';
 import { heartPoint, volumeNormal } from './geometry.js';
 import { shockwaveRings, touchFalloff } from './effects.js';
+import { magneticFalloff, smoothstep } from './interaction.js';
 
 function makeSprite() {
   const sprite = document.createElement('canvas');
@@ -63,7 +64,8 @@ export class CanvasRenderer {
   }
 
   render({ time, beat, zoom, unit, panX, panY, yaw = 0, pitch = 0,
-    touch = { x:-10000, y:-10000, strength:0, radius:110 }, reducedMotion = false }) {
+    touch = { x:-10000, y:-10000, strength:0, radius:110 },
+    interaction = {}, reducedMotion = false }) {
     if (!this.data) return;
     const ctx = this.ctx;
     const originX = this.width * .5 + panX;
@@ -95,6 +97,23 @@ export class CanvasRenderer {
       ctx.closePath();
       ctx.lineWidth = Math.max(.65,unit*.08);
       ctx.strokeStyle = 'rgba(255,96,153,'+(ring.strength*.19).toFixed(3)+')';
+      ctx.stroke();
+    }
+    const release=interaction.chargeWave;
+    if(release && release.progress>=0 && release.progress<1 && !reducedMotion) {
+      const u=smoothstep(release.progress);
+      const offset=.18+12.5*u;
+      ctx.beginPath();
+      for(let i=0;i<this.waveOutline.length;i++) {
+        const p=this.waveOutline[i];
+        const x=(p.x+p.nx*offset)*unit*.87;
+        const y=(p.y+p.ny*offset)*unit*.88;
+        if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+      }
+      ctx.closePath();
+      ctx.lineWidth=Math.max(.85,unit*.11);
+      ctx.strokeStyle='rgba(255,125,184,'+
+        (release.strength*(1-u)*.22).toFixed(3)+')';
       ctx.stroke();
     }
     const sweepX=-.2+.55*Math.sin(time*.43*(reducedMotion?0:1));
@@ -136,6 +155,16 @@ export class CanvasRenderer {
         // Outgoing and incoming hearts retain the same opacity.
       }
 
+      const extraBurst=interaction.burst||0;
+      if(extraBurst>.001) {
+        const direction=kind===0
+          ? {x, y:y-1, z:z+.05} : {x:nx, y:ny, z:nz};
+        const len=Math.max(.001,Math.hypot(direction.x,direction.y,direction.z));
+        const force=(kind===0?4.3:kind===1?6.2:kind===2?3.8:2.0)*extraBurst/len;
+        x+=direction.x*force;
+        y+=direction.y*force;
+        z+=direction.z*force;
+      }
       const rotated=rotatePoint(x,y,z,yaw,pitch);
       const depthScale=perspectiveScale(rotated.z);
       const px=rotated.x*unit*.87*depthScale;
@@ -146,6 +175,15 @@ export class CanvasRenderer {
       const touchDistance=Math.hypot(screenX-touch.x,screenY-touch.y);
       const influence=touch.strength*touchFalloff(touchDistance,touch.radius);
       let drawX=px, drawY=py;
+      const hover=interaction.hover;
+      let magnet=0;
+      if(hover && hover.strength>.001) {
+        const dx=hover.x-screenX,dy=hover.y-screenY;
+        const d=Math.hypot(dx,dy);
+        magnet=hover.strength*magneticFalloff(d,hover.radius);
+        drawX+=dx/(d+.01)*magnet*6/zoom;
+        drawY+=dy/(d+.01)*magnet*6/zoom;
+      }
       if(influence>.001){
         drawX+=(screenX-touch.x)/(touchDistance+.01)*influence*7/zoom;
         drawY+=(screenY-touch.y)/(touchDistance+.01)*influence*7/zoom;
@@ -163,10 +201,14 @@ export class CanvasRenderer {
       const rimGlow=kind===3
         ? .07+.36*Math.pow(grazing,2.25)
         : surfaceNormal ? .38+.80*Math.pow(grazing,1.55) : 1;
+      const charge=interaction.charge||0;
       ctx.globalAlpha=Math.min(1,alpha*(.75+.30*light)*opacity*rimGlow
-        *(.87+.20*diffuse+.06*sheen)*(1+.52*influence)*1.55);
+        *(.87+.20*diffuse+.06*sheen)*
+          (1+.52*influence+.22*magnet+
+            charge*(kind===0?.55:.08)+.14*extraBurst)*1.55);
       ctx.fillStyle='rgb('+red+','+green+','+blue+')';
-      const d=Math.max(.55,size*(kind===2?1.20:kind===3?.90:2.0)*Math.pow(zoom,.15));
+      const d=Math.max(.55,size*(kind===2?1.20:kind===3?.90:2.0)*
+        Math.pow(zoom,.15)*(1+.15*magnet+(kind===0?.23*charge:0)+.17*extraBurst));
       const symbol=((Math.sin(seed*93.271)*43758.5453)%1+1)%1;
       const isLittleHeart=(kind===0 && symbol>.992) || (kind===2 && symbol>.83);
       if((zoom>2.25&&kind<3)||isLittleHeart){

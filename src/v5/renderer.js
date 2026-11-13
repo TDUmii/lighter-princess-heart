@@ -49,12 +49,12 @@ export class VolumeRenderer {
     this.points = program(gl, pointVertex, pointFragment);
     this.skyU = uniforms(gl, this.sky, [
       'uResolution', 'uCenter', 'uUnit', 'uZoom', 'uTime', 'uBeat',
-      'uPeriod', 'uMotion'
+      'uPeriod', 'uMotion', 'uCharge', 'uChargeWave'
     ]);
     this.pointU = uniforms(gl, this.points, [
       'uResolution', 'uCenter', 'uUnit', 'uZoom', 'uRatio',
       'uTime', 'uPeriod', 'uBeat', 'uBurstTravel', 'uYaw', 'uPitch', 'uPass',
-      'uTouch', 'uMotion'
+      'uTouch', 'uMotion', 'uHover', 'uCharge', 'uBurst'
     ]);
 
     this.vao = gl.createVertexArray();
@@ -107,7 +107,8 @@ export class VolumeRenderer {
   }
 
   render({ time, beat, zoom, unit, panX, panY, yaw = 0, pitch = 0,
-    touch = { x: -10000, y: -10000, strength: 0, radius: 110 }, reducedMotion = false }) {
+    touch = { x: -10000, y: -10000, strength: 0, radius: 110 },
+    interaction = {}, reducedMotion = false }) {
     if (!this.layers || this.lost) return;
     const gl = this.gl;
     const ratio = this.ratio;
@@ -129,6 +130,9 @@ export class VolumeRenderer {
     gl.uniform1f(this.skyU.uBeat,beat);
     gl.uniform1f(this.skyU.uPeriod,HEART.period);
     gl.uniform1f(this.skyU.uMotion,reducedMotion?0:1);
+    gl.uniform1f(this.skyU.uCharge,interaction.charge||0);
+    const release=interaction.chargeWave||{progress:-1,strength:0};
+    gl.uniform2f(this.skyU.uChargeWave,release.progress,release.strength);
     gl.drawArrays(gl.TRIANGLES,0,3);
 
     gl.useProgram(this.points);
@@ -147,6 +151,11 @@ export class VolumeRenderer {
     gl.uniform4f(this.pointU.uTouch,touch.x*ratio,
       (this.height-touch.y)*ratio,touch.strength,touch.radius*ratio);
     gl.uniform1f(this.pointU.uMotion,reducedMotion?0:1);
+    const hover=interaction.hover||{x:-10000,y:-10000,strength:0,radius:122};
+    gl.uniform4f(this.pointU.uHover,hover.x*ratio,(this.height-hover.y)*ratio,
+      hover.strength,hover.radius*ratio);
+    gl.uniform1f(this.pointU.uCharge,interaction.charge||0);
+    gl.uniform1f(this.pointU.uBurst,interaction.burst||0);
 
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA,gl.ONE);
