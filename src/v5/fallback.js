@@ -5,28 +5,14 @@ import { rotatePoint, perspectiveScale } from './camera.js';
 import { heartPoint, volumeNormal } from './geometry.js';
 import { shockwaveRings, touchFalloff } from './effects.js';
 import { magneticFalloff, smoothstep } from './interaction.js';
-
-function makeSprite() {
-  const sprite = document.createElement('canvas');
-  sprite.width = sprite.height = 48;
-  const g = sprite.getContext('2d');
-  g.fillStyle = '#ff92b5';
-  g.beginPath();
-  g.moveTo(24,40);
-  g.bezierCurveTo(14,33,5,26,5,17);
-  g.bezierCurveTo(5,7,16,4,24,13);
-  g.bezierCurveTo(32,4,43,7,43,17);
-  g.bezierCurveTo(43,26,34,33,24,40);
-  g.fill();
-  return sprite;
-}
+import { createMiniHeartSprite } from './mini-heart.js';
 
 export class CanvasRenderer {
   constructor(canvas) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d',{alpha:false});
     if (!this.ctx) throw new Error('Canvas2D unavailable');
-    this.sprite = makeSprite();
+    this.sprite = createMiniHeartSprite(96);
     this.width = 0;
     this.height = 0;
     this.ratio = 1;
@@ -209,7 +195,8 @@ export class CanvasRenderer {
       const isLittleHeart=(kind===0 && symbol>.992) ||
         (kind>=1.5 && kind<2.1 && symbol>.83);
       if((zoom>2.25&&kind<3)||isLittleHeart){
-        const heartSize=Math.max(1.4,d*(kind>=1.5 && kind<2.1?1.55:2.0));
+        const heartSize=Math.max(isLittleHeart ? 8 : 1.4,
+          d*(kind>=1.5 && kind<2.1 ? 1.65 : 2.0));
         ctx.drawImage(this.sprite,drawX-heartSize/2,drawY-heartSize/2,heartSize,heartSize);
       } else {
         ctx.beginPath();

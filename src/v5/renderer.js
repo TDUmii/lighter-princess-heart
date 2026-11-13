@@ -1,6 +1,7 @@
 import { HEART } from './config.js';
 import { createParticleSystems, STRIDE } from './particles.js';
 import { skyVertex, skyFragment, pointVertex, pointFragment } from './shaders.js';
+import { createMiniHeartSprite } from './mini-heart.js';
 
 function shader(gl, type, source) {
   const compiled = gl.createShader(type);
@@ -54,8 +55,19 @@ export class VolumeRenderer {
     this.pointU = uniforms(gl, this.points, [
       'uResolution', 'uCenter', 'uUnit', 'uZoom', 'uRatio',
       'uTime', 'uPeriod', 'uBeat', 'uBurstTravel', 'uYaw', 'uPitch', 'uPass',
-      'uTouch', 'uMotion', 'uHover', 'uCharge'
+      'uTouch', 'uMotion', 'uHover', 'uCharge', 'uMiniHeart'
     ]);
+
+    // Both renderers use the same antialiased Bézier silhouette.
+    this.heartTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, this.heartTexture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE,
+      createMiniHeartSprite(128, '#ffffff'));
+    gl.bindTexture(gl.TEXTURE_2D, null);
 
     this.vao = gl.createVertexArray();
     this.buffer = gl.createBuffer();
@@ -136,6 +148,9 @@ export class VolumeRenderer {
     gl.drawArrays(gl.TRIANGLES,0,3);
 
     gl.useProgram(this.points);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.heartTexture);
+    gl.uniform1i(this.pointU.uMiniHeart, 0);
     gl.bindVertexArray(this.vao);
     gl.uniform2f(this.pointU.uResolution,width,height);
     gl.uniform2f(this.pointU.uCenter,cx,cy);
