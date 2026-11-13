@@ -2,6 +2,7 @@ import { HEART } from './config.js';
 import { createParticleSystems, STRIDE } from './particles.js';
 import { beatPhase, flightProgress, flightOpacity, flightDistance, deformScale } from './heartbeat.js';
 import { rotatePoint, perspectiveScale } from './camera.js';
+import { heartPoint, volumeNormal } from './geometry.js';
 import { shockwaveRings, touchFalloff } from './effects.js';
 
 function makeSprite() {
@@ -31,6 +32,13 @@ export class CanvasRenderer {
     this.data = null;
     this.count = 0;
     this.layers = null;
+    // Sample once: the ripple follows exactly the same implicit outline as
+    // the 3D particle heart, with no heavy geometry work per animation frame.
+    this.waveOutline = Array.from({ length: 128 }, (_, i) => {
+      const p = heartPoint(i * Math.PI * 2 / 128);
+      const n = volumeNormal(p.x, p.y, 0);
+      return { ...p, nx: n.nx, ny: n.ny };
+    });
   }
 
   resize(width, height, quality) {
@@ -75,11 +83,18 @@ export class CanvasRenderer {
     ctx.fillRect(-unit*34,-unit*34,unit*68,unit*68);
     ctx.globalCompositeOperation='screen';
     for (const ring of shockwaveRings(time,reducedMotion)) {
-      if (ring.strength<.005) continue;
+      if (ring.strength < .006) continue;
       ctx.beginPath();
-      ctx.arc(0,0,unit*ring.radius,0,Math.PI*2);
-      ctx.lineWidth=Math.max(.7,unit*.10);
-      ctx.strokeStyle='rgba(255,88,140,'+(ring.strength*.10).toFixed(3)+')';
+      for (let i = 0; i < this.waveOutline.length; i++) {
+        const p = this.waveOutline[i];
+        const x = (p.x + p.nx * ring.offset) * unit * .87;
+        const y = (p.y + p.ny * ring.offset) * unit * .88;
+        if (i === 0) ctx.moveTo(x,y);
+        else ctx.lineTo(x,y);
+      }
+      ctx.closePath();
+      ctx.lineWidth = Math.max(.65,unit*.08);
+      ctx.strokeStyle = 'rgba(255,96,153,'+(ring.strength*.19).toFixed(3)+')';
       ctx.stroke();
     }
     const sweepX=-.2+.55*Math.sin(time*.43*(reducedMotion?0:1));

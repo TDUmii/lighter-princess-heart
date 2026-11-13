@@ -266,7 +266,7 @@ export class HeartScene {
 
   diagnostics() {
     return {
-      version: '6.0',
+      version: '6.1',
       engine: this.engine,
       tier: this.qualityTier,
       fps: this.fps,
@@ -297,8 +297,7 @@ export class HeartScene {
     this.secret.style.visibility=reveal>0.005?'visible':'hidden';
     this.secret.setAttribute('aria-hidden',reveal>0.005?'false':'true');
     this.secret.style.opacity=(reveal*.93).toFixed(3);
-    this.secret.style.left=(this.width*.5+this.panX)+'px';
-    this.secret.style.top=(this.height*.5+this.unit*.9+this.panY)+'px';
+    this.secret.style.left=(this.width*.5+this.panX)+'px';    this.secret.style.top=(this.height*.5+this.unit*.9+this.panY)+'px';
     this.secret.style.transform='translate(-50%, -50%) scale('+clamp(this.zoom*.74,.8,2.25).toFixed(3)+')';
   }
 }

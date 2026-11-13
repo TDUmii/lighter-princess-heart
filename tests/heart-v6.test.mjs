@@ -9,10 +9,10 @@ test('two shockwaves trigger at heartbeat peaks and decay without flashing',()=>
   for(const [start,index] of [[SHOCKWAVE.first,0],[SHOCKWAVE.second,1]]){
     const born=shockwaveRings(start*HEART.period)[index];
     near(born.progress,0);
-    near(born.radius,SHOCKWAVE.startRadius);
-    assert.ok(born.strength>.4);
+    near(born.offset,SHOCKWAVE.startOffset);
+    assert.ok(born.strength>.3);
     const after=shockwaveRings((start+SHOCKWAVE.duration*.85)*HEART.period)[index];
-    assert.ok(after.radius>born.radius);
+    assert.ok(after.offset>born.offset);
     assert.ok(after.strength<born.strength);
     assert.ok(after.strength>=0);
   }
@@ -24,7 +24,7 @@ test('shockwave looping and motion curves remain continuous',()=>{
     const first=shockwaveRings(t);
     const oneCycle=shockwaveRings(t+HEART.period);
     for(let i=0;i<2;i++){
-      near(first[i].radius,oneCycle[i].radius);
+      near(first[i].offset,oneCycle[i].offset);
       near(first[i].strength,oneCycle[i].strength);
       assert.ok(first[i].strength>=0 && first[i].strength<=1);
     }
@@ -48,4 +48,20 @@ test('touch hotspot only activates inside visible front-facing heart',()=>{
   assert.equal(withinHeart(w-1,h-1,w,h,unit,zoom,panX,panY),false);
   assert.equal(withinHeart(cx,cy,w,h,0,zoom,panX,panY),false);
   assert.equal(withinHeart(cx+80,cy+20,w,h,unit,2,panX,panY),true);
+});
+test('soft wave tracks the real heart outline, not a circle',async()=>{
+  const { heartPoint, heartField } = await import('../src/v5/geometry.js');
+  const { skyFragment, pointVertex } = await import('../src/v5/shaders.js');
+  const distances=[];
+  for(let i=0;i<80;i++){
+    const p=heartPoint(i*Math.PI*2/80);
+    assert.ok(Math.abs(heartField(p.x,p.y,0))<.001);
+    assert.ok(Math.abs(heartField(-p.x,p.y,0))<.001);
+    distances.push(Math.hypot(p.x,p.y-1.1));
+  }
+  assert.ok(Math.max(...distances)-Math.min(...distances)>2);
+  assert.ok(SHOCKWAVE.travel<3);
+  assert.ok(shockwaveRings(SHOCKWAVE.second*HEART.period)[1].strength<.5);
+  assert.match(skyFragment,/heartEdgeDistance\(p\)/);
+  assert.match(pointVertex,/heartRipple\(edgeDistance/);
 });
