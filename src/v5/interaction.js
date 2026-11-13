@@ -2,14 +2,10 @@
 export const INTERACTION = Object.freeze({
   hoverRadius: 122,
   magnetDistance: 6,
-  tapMaxMs: 320,
-  doubleTapMs: 340,
-  doubleTapRadius: 44,
   dragCancelPx: 13,
   holdDelayMs: 150,
   fullChargeMs: 1050,
-  chargeWaveMs: 1050,
-  burstMs: 1450
+  chargeWaveMs: 1050
 });
 
 export function smoothstep(value) {
@@ -23,21 +19,12 @@ export function magneticFalloff(distance, radius = INTERACTION.hoverRadius) {
     : 0;
 }
 
-export function burstEnvelope(elapsedMs) {
-  if (elapsedMs < 0 || elapsedMs >= INTERACTION.burstMs) return 0;
-  const p = elapsedMs / INTERACTION.burstMs;
-  return Math.sin(Math.PI * p) ** 2;
-}
-
 export class HeartInteraction {
   constructor() {
     this.hover = { x: -10000, y: -10000, target: 0, strength: 0 };
     this.press = null;
     this.charge = 0;
     this.chargeWave = { started: -Infinity, strength: 0 };
-    this.burstStarted = -Infinity;
-    this.lastTap = null;
-    this.burstCount = 0;
     this.chargeCount = 0;
   }
 
@@ -78,23 +65,11 @@ export class HeartInteraction {
     const moved = held.moved || Math.hypot(x - held.x, y - held.y) > INTERACTION.dragCancelPx;
     const charge = this.charge;
     this.charge = 0;
-    if (cancelled || moved || reduced) { this.lastTap = null; return null; }
+    if (cancelled || moved || reduced) return null;
     if (duration >= INTERACTION.holdDelayMs + 120 && charge >= .12) {
       this.chargeWave = { started: now, strength: .42 + .50 * charge };
-      this.lastTap = null;
       this.chargeCount++;
       return 'charge';
-    }
-    if (duration <= INTERACTION.tapMaxMs) {
-      const prev = this.lastTap;
-      if (prev && now - prev.time <= INTERACTION.doubleTapMs
-          && Math.hypot(x - prev.x, y - prev.y) <= INTERACTION.doubleTapRadius) {
-        this.burstStarted = now;
-        this.burstCount++;
-        this.lastTap = null;
-        return 'burst';
-      }
-      this.lastTap = { x, y, time: now };
     }
     return null;
   }
@@ -115,7 +90,6 @@ export class HeartInteraction {
     } else {
       this.charge = 0;
     }
-    if (this.lastTap && now - this.lastTap.time > INTERACTION.doubleTapMs) this.lastTap = null;
   }
 
   state(now, reduced = false) {
@@ -131,8 +105,7 @@ export class HeartInteraction {
         radius: INTERACTION.hoverRadius
       },
       charge: reduced ? 0 : this.charge,
-      chargeWave,
-      burst: reduced ? 0 : burstEnvelope(now - this.burstStarted)
+      chargeWave
     };
   }
 }

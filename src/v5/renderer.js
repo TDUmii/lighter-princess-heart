@@ -54,7 +54,7 @@ export class VolumeRenderer {
     this.pointU = uniforms(gl, this.points, [
       'uResolution', 'uCenter', 'uUnit', 'uZoom', 'uRatio',
       'uTime', 'uPeriod', 'uBeat', 'uBurstTravel', 'uYaw', 'uPitch', 'uPass',
-      'uTouch', 'uMotion', 'uHover', 'uCharge', 'uBurst'
+      'uTouch', 'uMotion', 'uHover', 'uCharge'
     ]);
 
     this.vao = gl.createVertexArray();
@@ -155,7 +155,6 @@ export class VolumeRenderer {
     gl.uniform4f(this.pointU.uHover,hover.x*ratio,(this.height-hover.y)*ratio,
       hover.strength,hover.radius*ratio);
     gl.uniform1f(this.pointU.uCharge,interaction.charge||0);
-    gl.uniform1f(this.pointU.uBurst,interaction.burst||0);
 
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA,gl.ONE);

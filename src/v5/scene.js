@@ -71,12 +71,6 @@ export class HeartScene {
       const delta=clamp(event.deltaY,-200,200);
       this.setZoom(this.targetZoom*Math.exp(-delta*.00145));
     },{passive:false});
-    this.canvas.addEventListener('dblclick',event=>{
-      event.preventDefault();
-      // Double clicking the heart now bursts; the button remains the reliable reset.
-      if (!withinHeart(event.clientX,event.clientY,
-        this.width,this.height,this.unit,this.zoom,this.panX,this.panY)) this.resetView();
-    });
     this.canvas.addEventListener('pointerleave',event=>{
       if (event.pointerType!=='touch') this.interaction.moveHover(0,0,false);
     });
@@ -310,7 +304,7 @@ export class HeartScene {
 
   diagnostics() {
     return {
-      version: '7.0',
+      version: '7.1',
       engine: this.engine,
       tier: this.qualityTier,
       fps: this.fps,
@@ -325,9 +319,7 @@ export class HeartScene {
       hoverStrength: Number(this.interaction.hover.strength.toFixed(3)),
       charge: Number(this.interaction.charge.toFixed(3)),
       chargeWave: Number(this.interaction.state(performance.now()).chargeWave.strength.toFixed(3)),
-      burst: Number(this.interaction.state(performance.now()).burst.toFixed(3)),
       chargeCount: this.interaction.chargeCount,
-      burstCount: this.interaction.burstCount,
       trailCount: this.trail.particles.length
     };
   }

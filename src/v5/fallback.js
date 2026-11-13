@@ -155,16 +155,6 @@ export class CanvasRenderer {
         // Outgoing and incoming hearts retain the same opacity.
       }
 
-      const extraBurst=interaction.burst||0;
-      if(extraBurst>.001) {
-        const direction=kind===0
-          ? {x, y:y-1, z:z+.05} : {x:nx, y:ny, z:nz};
-        const len=Math.max(.001,Math.hypot(direction.x,direction.y,direction.z));
-        const force=(kind===0?4.3:kind===1?6.2:kind===2?3.8:2.0)*extraBurst/len;
-        x+=direction.x*force;
-        y+=direction.y*force;
-        z+=direction.z*force;
-      }
       const rotated=rotatePoint(x,y,z,yaw,pitch);
       const depthScale=perspectiveScale(rotated.z);
       const px=rotated.x*unit*.87*depthScale;
@@ -205,10 +195,10 @@ export class CanvasRenderer {
       ctx.globalAlpha=Math.min(1,alpha*(.75+.30*light)*opacity*rimGlow
         *(.87+.20*diffuse+.06*sheen)*
           (1+.52*influence+.22*magnet+
-            charge*(kind===0?.55:.08)+.14*extraBurst)*1.55);
+            charge*(kind===0?.55:.08))*1.55);
       ctx.fillStyle='rgb('+red+','+green+','+blue+')';
       const d=Math.max(.55,size*(kind===2?1.20:kind===3?.90:2.0)*
-        Math.pow(zoom,.15)*(1+.15*magnet+(kind===0?.23*charge:0)+.17*extraBurst));
+        Math.pow(zoom,.15)*(1+.15*magnet+(kind===0?.23*charge:0)));
       const symbol=((Math.sin(seed*93.271)*43758.5453)%1+1)%1;
       const isLittleHeart=(kind===0 && symbol>.992) || (kind===2 && symbol>.83);
       if((zoom>2.25&&kind<3)||isLittleHeart){
