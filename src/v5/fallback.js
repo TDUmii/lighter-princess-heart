@@ -59,7 +59,7 @@ export class CanvasRenderer {
     const originX = this.width * .5 + panX;
     const originY = this.height * .5 + unit * .9 + panY;
     ctx.setTransform(this.ratio,0,0,this.ratio,0,0);
-    ctx.fillStyle = '#000105';
+    ctx.fillStyle = '#030104';
     ctx.fillRect(0,0,this.width,this.height);
 
     ctx.save();
@@ -88,8 +88,8 @@ export class CanvasRenderer {
       y=1+(y-1)*scale;
 
       z*=scale;
-      if (kind>0 && kind<3) {
-        x+=nx*.10*Math.sin(time*speed+seed);
+      if (kind===1) {
+        x+=nx*.08*Math.sin(time*speed+seed);
         y+=ny*.10*Math.sin(time*speed+seed);
         z+=nz*.10*Math.sin(time*speed+seed);
       }
@@ -101,11 +101,11 @@ export class CanvasRenderer {
         if(opacity<=0)continue;
         const distance=flightDistance(phase,delay);
         const organic=((Math.sin(seed*19.731)*43563.123)%1+1)%1;
-        const travel=distance*(.76+.32*organic);
+        const travel=distance*(.79+.39*organic);
         const arc=Math.sin(Math.PI*distance/HEART.burstTravel);
-        x+=nx*travel-ny*arc*(organic-.5)*.58;
-        y+=ny*travel+nx*arc*(organic-.5)*.58;
-        z+=nz*travel+arc*.16*Math.sin(seed*2.21);
+        x+=nx*travel-ny*arc*(organic-.5)*.72;
+        y+=ny*travel+nx*arc*(organic-.5)*.72;
+        z+=nz*travel+arc*.26*Math.sin(seed*2.21);
         // Outgoing and incoming hearts retain the same opacity.
       }
 
@@ -113,14 +113,15 @@ export class CanvasRenderer {
       const depthScale=perspectiveScale(rotated.z);
       const px=rotated.x*unit*.87*depthScale;
       const py=rotated.y*unit*.88*depthScale;
-      const light=Math.min(1,Math.max(0,rotated.z/24+.54));
+      const t=Math.max(0,Math.min(1,(rotated.z+19)/39));
+      const light=t*t*(3-2*t);
       const red=Math.round(226+29*tone);
       const green=Math.round(35+102*(.42*tone+.58*light));
       const blue=Math.round(74+95*(.42*tone+.58*light));
       const surfaceNormal=(kind===1||kind===3)?rotatePoint(nx,ny,nz,yaw,pitch):null;
       const grazing=surfaceNormal ? Math.max(0,1-Math.abs(surfaceNormal.z)) : 0;
       const rimGlow=kind===3
-        ? .025+.30*Math.pow(grazing,2.25)
+        ? .07+.36*Math.pow(grazing,2.25)
         : surfaceNormal ? .38+.80*Math.pow(grazing,1.55) : 1;
       ctx.globalAlpha=Math.min(1,alpha*(.75+.30*light)*opacity*rimGlow);
       ctx.fillStyle='rgb('+red+','+green+','+blue+')';

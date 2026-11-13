@@ -12,12 +12,13 @@ export function createRimParticle(rand) {
       if(score>best){point=candidate;best=score;}
     }
   }
-  const offset=.08+rand()*.34;
+  // Keep fixed glitter tucked into the skin instead of jagged outward spikes.
+  const offset=.025+rand()*.105;
   return {
     x:point.x+point.nx*offset,
     y:point.y+point.ny*offset,
     z:point.z+point.nz*offset,
     kind:3,nx:point.nx,ny:point.ny,nz:point.nz,
-    alpha:.075+rand()*.085
+    alpha:.09+rand()*.10
   };
 }

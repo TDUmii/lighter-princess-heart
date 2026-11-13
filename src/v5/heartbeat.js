@@ -1,24 +1,15 @@
 import { HEART } from './config.js';
 
+// Two compact beats, with a softer recoil and a resting interval.
 export const PULSE_KEYFRAMES = Object.freeze([
-  [0.00,  0.000],
-  [0.150, -0.115],
-  [0.320,  0.115],
-  [0.515, -0.024],
-  [0.685,  0.016],
-  [1.00,  0.000]
+  [0.000, 0.000], [0.085, -0.020], [0.145, 0.075],
+  [0.215, -0.034], [0.325, 0.116], [0.420, -0.042],
+  [0.565, 0.014], [0.750, 0.000], [1.000, 0.000]
 ]);
 
-// Each miniature heart travels on one uninterrupted out-and-back path:
-// phase .245 -> .690 -> 1.135 (two equal-length legs of .445 cycles).
-// The small seeded start offset only staggers the hearts; each heart
-// always returns along its own outbound 3D surface normal.
+// Equal out-and-back legs continue seamlessly over the beat boundary.
 export const FLIGHT = Object.freeze({
-  start: .245,
-  leg: .445,
-  stagger: .50,
-  fadeIn: .23,
-  fadeOut: 1.77
+  start: .24, leg: .445, stagger: .48, fadeIn: .19, fadeOut: 1.81
 });
 
 export function ease(t) {
@@ -35,35 +26,31 @@ export function heartbeat(seconds) {
   for (let i = 0; i < PULSE_KEYFRAMES.length - 1; i++) {
     const [start, from] = PULSE_KEYFRAMES[i];
     const [end, to] = PULSE_KEYFRAMES[i + 1];
-    if (phase <= end) {
-      return from + (to - from) * ease((phase - start) / (end - start));
-    }
+    if (phase <= end) return from + (to - from) * ease((phase - start) / (end - start));
   }
   return 0;
 }
 
-// Treat the end of a heartbeat and the start of the next as the same
-// continuous timeline, avoiding teleportation at phase 1 -> 0.
 export function flightProgress(phase, delay = 0) {
   const p = ((phase % 1) + 1) % 1;
-  const timeline = p < .20 ? p + 1 : p;
+  const timeline = p < .18 ? p + 1 : p;
   const launch = FLIGHT.start + (delay - .075) * FLIGHT.stagger;
   return (timeline - launch) / FLIGHT.leg;
 }
 
+export function flightCurve(progress) {
+  if (progress <= 0 || progress >= 2) return 0;
+  return ease(progress <= 1 ? progress : 2 - progress);
+}
+
 export function flightDistance(phase, delay = 0) {
-  const p = flightProgress(phase, delay);
-  if (p <= 0 || p >= 2) return 0;
-  const half = p <= 1 ? p : 2 - p;
-  return HEART.burstTravel * ease(half);
+  return HEART.burstTravel * flightCurve(flightProgress(phase, delay));
 }
 
 export function flightOpacity(phase, delay = 0) {
   const p = flightProgress(phase, delay);
   if (p <= 0 || p >= 2) return 0;
-  const entrance = ease(p / FLIGHT.fadeIn);
-  const exit = 1 - ease((p - FLIGHT.fadeOut) / (2 - FLIGHT.fadeOut));
-  return entrance * exit;
+  return ease(p / FLIGHT.fadeIn) * (1 - ease((p - FLIGHT.fadeOut) / (2 - FLIGHT.fadeOut)));
 }
 
 export function burstStrength(phase, delay = 0) {
@@ -86,8 +73,5 @@ export function returnDistance(phase, delay = 0) {
 
 export function deformScale(kind, radial, beat) {
   const r = Math.min(1, Math.max(0, radial));
-  const weight = kind === 0
-    ? (1.12 - .15 * r * r)
-    : (kind === 3 ? 0 : .91);
-  return 1 + beat * weight;
+  return 1 + beat * (kind === 0 ? 1.08 - .13 * r * r : kind === 3 ? .20 : .94);
 }

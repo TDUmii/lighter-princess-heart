@@ -2,7 +2,7 @@ import { surfacePoint } from '../geometry.js';
 
 export function createShellParticle(rand) {
   const p = surfacePoint(rand);
-  const inset = (rand() - .5) * .35;
+  const inset = (rand() - .5) * .20;
   return {
     x: p.x + p.nx * inset,
     y: p.y + p.ny * inset,

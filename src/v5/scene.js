@@ -32,7 +32,13 @@ export class HeartScene {
     this.pinch = null;
     this.fpsWindow = 0;
     this.frameCounter = 0;
-    this.adjusted = false;
+    const lowMemory = navigator.deviceMemory && navigator.deviceMemory <= 2;
+    const modestDevice = (navigator.deviceMemory && navigator.deviceMemory <= 4)
+      || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
+    this.qualityTier = lowMemory ? 0 : modestDevice ? 1 : 2;
+    this.lastQualityChange = performance.now();
+    this.stableWindows = 0;
+    this.fps = 0;
 
     try {
       this.renderer = new VolumeRenderer(canvas);
@@ -145,7 +151,7 @@ export class HeartScene {
     this.width=width;
     this.height=height;
     this.unit=heartUnit(width,height);
-    this.quality=qualityFor(width,height,window.devicePixelRatio||1);
+    this.quality=qualityFor(width,height,window.devicePixelRatio||1,this.qualityTier);
     this.renderer.resize(width,height,this.quality);
     this.draw(performance.now());
   }
@@ -202,19 +208,48 @@ export class HeartScene {
 
     this.draw(now);
     this.frameCounter++;
-    if(this.engine==='WebGL2'&&!this.adjusted){
-      if(!this.fpsWindow)this.fpsWindow=now;
-      const elapsed=now-this.fpsWindow;
-      if(elapsed>5500){
-        this.adjusted=true;
-        const fps=this.frameCounter/(elapsed/1000);
-        if(fps<39&&this.quality.pixelRatio>1.0){
-          this.quality={...this.quality,pixelRatio:Math.max(1,this.quality.pixelRatio*.74)};
-          this.renderer.resize(this.width,this.height,this.quality);
-        }
+    if (!this.fpsWindow) this.fpsWindow = now;
+    const elapsed = now - this.fpsWindow;
+    if (elapsed >= 4500) {
+      const fps = this.frameCounter / (elapsed / 1000);
+      this.fps = Math.round(fps);
+      const cooldown = now - this.lastQualityChange;
+      if (fps < 43 && this.qualityTier > 0 && cooldown > 6000) {
+        this.setQualityTier(this.qualityTier - 1, now);
+      } else if (fps > 56 && this.qualityTier < 2 && cooldown > 18000) {
+        if (++this.stableWindows >= 2) this.setQualityTier(this.qualityTier + 1, now);
+      } else {
+        this.stableWindows = 0;
       }
+      this.frameCounter = 0;
+      this.fpsWindow = now;
     }
     this.frameId=requestAnimationFrame(this.drawFrame);
+  }
+
+  setQualityTier(tier, now = performance.now()) {
+    const next = clamp(tier, 0, 2);
+    if (next === this.qualityTier) return;
+    this.qualityTier = next;
+    this.quality = qualityFor(this.width, this.height, window.devicePixelRatio || 1, next);
+    this.renderer.resize(this.width, this.height, this.quality);
+    this.lastQualityChange = now;
+    this.stableWindows = 0;
+  }
+
+  diagnostics() {
+    return {
+      version: '5.0',
+      engine: this.engine,
+      tier: this.qualityTier,
+      fps: this.fps,
+      particles: this.quality ? this.quality.core + this.quality.shell
+        + this.quality.rim + this.quality.burst : 0,
+      pixelRatio: this.quality?.pixelRatio ?? 0,
+      yaw: this.yaw,
+      pitch: this.pitch,
+      zoom: this.zoom
+    };
   }
 
   draw(now){

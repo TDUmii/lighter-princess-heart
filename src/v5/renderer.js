@@ -39,7 +39,7 @@ export class VolumeRenderer {
       antialias: false,
       depth: false,
       stencil: false,
-      preserveDrawingBuffer: true,
+      preserveDrawingBuffer: false,
       powerPreference: 'high-performance'
     });
     if (!gl) throw new Error('WebGL2 unavailable');
